@@ -41,10 +41,12 @@ nav a.active {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 .admin-grid {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
   gap: 60px;
   padding-top: 35px;
 }
@@ -87,6 +89,8 @@ nav a.active {
   color: var(--club-green-dark);
   text-align: left;
   text-decoration: underline;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .danger {
   color: var(--club-green-text);

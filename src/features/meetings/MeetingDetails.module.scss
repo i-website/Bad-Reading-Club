@@ -11,10 +11,16 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .detail svg {
   flex: none;
   margin-top: 2px;
+}
+.detail > :not(svg) {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .weekday {
   display: block;

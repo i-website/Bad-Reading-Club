@@ -43,7 +43,7 @@ export function BookPage({ data }: { data: ClubData }) {
               {rating.votes != null && ` · ${formatVotes(rating.votes)}`}
             </p>
           )}
-          {rating && rating.rating == null && <p>Не голосовали</p>}
+          {rating && rating.rating == null && <p>-</p>}
           <p className={styles.prose}>
             {book.description || "Описание книги пока не добавлено."}
           </p>

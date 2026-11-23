@@ -21,7 +21,7 @@ export function RatingList({ entries }: { entries: RankedBook[] }) {
             </span>
             <span className={styles.score}>
               {rating == null ? (
-                "Не голосовали"
+                "-"
               ) : (
                 <>
                   <RatingValue value={rating} />

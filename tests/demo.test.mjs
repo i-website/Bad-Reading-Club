@@ -25,6 +25,7 @@ let dateHelpers;
 let buildSchedule;
 let ratingTone;
 let restoreRoute;
+let sortRanking;
 
 before(async () => {
   server = await createServer({
@@ -43,6 +44,7 @@ before(async () => {
   ).ratingTone;
   restoreRoute = (await server.ssrLoadModule("/src/routeBootstrap.ts"))
     .restoreRoute;
+  sortRanking = (await server.ssrLoadModule("/src/features/ratings/ranking.ts")).sortRanking;
 });
 after(async () => {
   await server?.close();
@@ -335,6 +337,16 @@ test("rating colors follow the thresholds", () => {
   assert.equal(ratingTone(7.99), "medium");
   assert.equal(ratingTone(8), "high");
   assert.equal(ratingTone(10), "high");
+});
+
+test("equal scores retain place order when sorting by rating", () => {
+  const entries = [
+    { book: { title: "А" }, rating: 8.25, rank: 6, votes: 24 },
+    { book: { title: "Я" }, rating: 8.25, rank: 5, votes: 24 },
+    { book: { title: "Б" }, rating: null, rank: null, votes: null },
+  ];
+  assert.deepEqual(sortRanking(entries, "rating").map((entry) => entry.rank), [5, 6, null]);
+  assert.deepEqual(sortRanking(entries, "title").map((entry) => entry.book.title), ["А", "Б", "Я"]);
 });
 
 test("direct routes and legacy hash links restore without losing parameters", () => {

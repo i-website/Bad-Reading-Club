@@ -1,4 +1,5 @@
 ﻿import { Link } from "react-router-dom";
+import { CalendarDays } from "lucide-react";
 import type { Book, Meeting } from "../../types";
 import { formatDate, isUpcomingMeeting } from "../../lib/format";
 import { Media } from "../../components/Media";
@@ -63,6 +64,7 @@ export function HomeWidgets({ books, meetings }: Props) {
                     <span>{book.author}</span>
                   </span>
                   <span className={styles.date}>
+                    <CalendarDays size={16} aria-hidden="true" />
                     {formatDate(meeting.starts_at)}
                   </span>
                 </Link>

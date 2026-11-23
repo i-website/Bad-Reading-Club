@@ -1,17 +1,12 @@
 ﻿import { useState } from "react";
 import type { ClubData } from "../types";
 import { RatingList } from "../features/ratings/RatingList";
-import { getRanking } from "../features/ratings/ranking";
+import { getRanking, sortRanking, type RankingSort } from "../features/ratings/ranking";
 import styles from "./RatingsPage.module.scss";
 
-type Sort = "rating" | "title";
 export function RatingsPage({ data }: { data: ClubData }) {
-  const [sort, setSort] = useState<Sort>("rating");
-  const entries = getRanking(data.books).sort((a, b) => {
-    const alphabetical = a.book.title.localeCompare(b.book.title, "ru");
-    if (sort === "title") return alphabetical;
-    return (b.rating ?? -1) - (a.rating ?? -1) || alphabetical;
-  });
+  const [sort, setSort] = useState<RankingSort>("rating");
+  const entries = sortRanking(getRanking(data.books), sort);
   return (
     <section>
       <p className={styles.eyebrow}>Книжный клуб</p>

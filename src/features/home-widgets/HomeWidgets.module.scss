@@ -14,6 +14,7 @@
 .widget h2 {
   font-size: 2rem;
   margin-bottom: 24px;
+  color: var(--club-green-dark);
 }
 .eyebrow {
   text-transform: uppercase;
@@ -31,6 +32,9 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
+}
+.heading > div {
+  min-width: 0;
 }
 .all {
   color: var(--club-green-dark);
@@ -64,9 +68,11 @@
 }
 .book {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   flex: 1;
   gap: 4px;
   min-width: 0;
+  overflow-wrap: anywhere;
 }
 .book span,
 .date {
@@ -74,7 +80,12 @@
   font-size: 0.9rem;
 }
 .date {
-  text-align: right;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.date svg {
+  flex: none;
 }
 @media (max-width: 800px) {
   .widgets {
@@ -87,11 +98,34 @@
     padding: 20px;
   }
   .row {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 4px 16px;
+  }
+  .cover {
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+  .book {
+    align-self: end;
   }
   .date {
-    width: 100%;
-    padding-left: 64px;
+    grid-column: 2;
+    align-self: start;
     text-align: left;
+  }
+  .widget h2 {
+    font-size: 1.6rem;
+  }
+}
+@media (max-width: 400px) {
+  .heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .heading h2 {
+    margin-bottom: 0;
   }
 }

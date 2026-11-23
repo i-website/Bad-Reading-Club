@@ -38,7 +38,7 @@ export function Plans({ data }: { data: Data }) {
             const content = (
               <>
                 <Media path={b.cover_path} alt="" className={styles["thumb"]} />
-                <div>
+                <div className={styles.book}>
                   {next && (
                     <span className={styles.badge}>Следующая встреча</span>
                   )}
@@ -56,7 +56,11 @@ export function Plans({ data }: { data: Data }) {
                   )}
                   {past && m?.starts_at && <small>Встреча прошла</small>}
                 </div>
-                {!past && <span aria-hidden="true">›</span>}
+                {!past && (
+                  <span className={styles.chevron} aria-hidden="true">
+                    ›
+                  </span>
+                )}
               </>
             );
             return past ? (

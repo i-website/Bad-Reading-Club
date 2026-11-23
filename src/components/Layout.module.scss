@@ -74,3 +74,15 @@
 .navigation a.active {
   background: #e3ece5;
 }
+@media (max-width: 360px) {
+  .header {
+    gap: 12px;
+  }
+  .brand {
+    min-width: 0;
+    white-space: normal;
+  }
+  .menu {
+    flex: none;
+  }
+}
