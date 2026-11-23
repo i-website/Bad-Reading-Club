@@ -1,10 +1,10 @@
 @import "tailwindcss" layer(tailwind);
 :root {
-  --club-green: #25845f;
-  --club-green-dark: #17694b;
-  --club-green-text: #1b513b;
+  --club-green: #1d4733;
+  --club-green-dark: #1d4733;
+  --club-green-text: #1d4733;
   font-family: Arial, sans-serif;
-  color: #17211b;
+  color: var(--club-green-text);
   background: #f4f0ea;
   font-synthesis: none;
 }
@@ -110,7 +110,7 @@ footer {
   display: flex;
   justify-content: space-between;
   gap: 20px;
-  color: #536057;
+  color: var(--club-green-text);
   font-size: 0.85rem;
 }
 footer a {
@@ -123,7 +123,7 @@ label {
   font-size: 0.92rem;
 }
 label small {
-  color: #5e685f;
+  color: var(--club-green-text);
 }
 input,
 textarea,
@@ -133,7 +133,7 @@ select {
   background: #fffefa;
   border-radius: 6px;
   padding: 11px;
-  color: #17211b;
+  color: var(--club-green-text);
 }
 textarea {
   min-height: 110px;

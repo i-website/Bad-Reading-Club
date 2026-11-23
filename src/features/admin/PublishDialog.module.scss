@@ -1,10 +1,10 @@
-﻿.dialog {
+.dialog {
   border: 1px solid #d9d7ce;
   border-radius: 14px;
   padding: 28px;
   width: min(90vw, 480px);
   background: #f4f0ea;
-  color: #17211b;
+  color: var(--club-green-text);
 }
 .dialog::backdrop {
   background: rgb(0 0 0 / 48%);
@@ -25,5 +25,5 @@
   color: var(--club-green-text);
 }
 .error {
-  color: #9a352c;
+  color: var(--club-green-text);
 }

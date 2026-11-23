@@ -1,4 +1,4 @@
-﻿.widgets {
+.widgets {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
   gap: 24px;
@@ -22,7 +22,7 @@
   margin-bottom: 12px;
 }
 .empty {
-  color: #5e685f;
+  color: var(--club-green-text);
   margin: 0;
 }
 .heading {
@@ -63,7 +63,7 @@
 }
 .book span,
 .date {
-  color: #5e685f;
+  color: var(--club-green-text);
   font-size: 0.9rem;
 }
 .date {

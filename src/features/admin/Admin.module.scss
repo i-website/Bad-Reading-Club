@@ -23,7 +23,7 @@ nav a.active {
   border-radius: 7px;
 }
 .error {
-  color: #9a352c;
+  color: var(--club-green-text);
 }
 .notice.error {
   background: #f8e8e5;
@@ -67,6 +67,7 @@ nav a.active {
 }
 .group h3,
 .group summary {
+  font-family: Georgia, "Times New Roman", serif;
   font-size: 1.15rem;
   font-weight: 600;
 }
@@ -88,7 +89,7 @@ nav a.active {
   text-decoration: underline;
 }
 .danger {
-  color: #a33e35;
+  color: var(--club-green-text);
 }
 @media (max-width: 800px) {
   .admin-grid {
