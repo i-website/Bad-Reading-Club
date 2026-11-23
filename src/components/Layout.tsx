@@ -41,12 +41,6 @@ export function Layout({
             Планы
           </NavLink>
           <NavLink
-            to="/ratings"
-            className={({ isActive }) => (isActive ? styles.active : undefined)}
-          >
-            Рейтинг
-          </NavLink>
-          <NavLink
             to="/admin"
             className={({ isActive }) => (isActive ? styles.active : undefined)}
           >

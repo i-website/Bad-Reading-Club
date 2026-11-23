@@ -64,3 +64,65 @@ test("older saved demo data gets a meeting without losing existing content", asy
   assert.equal(data.length, 1);
   assert.equal(data[0].price ?? null, null);
 });
+
+test("one operation creates and edits a meeting together with its book", async () => {
+  const book = {
+    slug: "combined-test",
+    title: "First title",
+    author: "Author",
+    status: "planned",
+    description: "",
+    published: true,
+    cover_path: null,
+  };
+  const meeting = {
+    starts_at: null,
+    place: "Example",
+    price: 0,
+    notes: "",
+    published: true,
+  };
+  assert.equal(
+    (
+      await demo.rpc("save_meeting_with_book", {
+        p_meeting_id: null,
+        p_book: book,
+        p_meeting: meeting,
+      })
+    ).error,
+    null,
+  );
+  const { data: books } = await demo
+    .from("books")
+    .select("*")
+    .eq("slug", book.slug);
+  assert.equal(books.length, 1);
+  const { data: meetings } = await demo
+    .from("meetings")
+    .select("*")
+    .eq("book_id", books[0].id);
+  assert.equal(meetings.length, 1);
+  assert.equal(meetings[0].price, 0);
+  assert.equal(
+    (
+      await demo.rpc("save_meeting_with_book", {
+        p_meeting_id: meetings[0].id,
+        p_book: { ...book, title: "Changed" },
+        p_meeting: { ...meeting, price: 300 },
+      })
+    ).error,
+    null,
+  );
+  const updatedBook = await demo
+    .from("books")
+    .select("*")
+    .eq("id", books[0].id)
+    .maybeSingle();
+  const updatedMeeting = await demo
+    .from("meetings")
+    .select("*")
+    .eq("id", meetings[0].id)
+    .maybeSingle();
+  assert.equal(updatedBook.data.title, "Changed");
+  assert.equal(updatedMeeting.data.price, 300);
+});

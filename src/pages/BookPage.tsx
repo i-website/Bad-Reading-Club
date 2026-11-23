@@ -15,7 +15,6 @@ export function BookPage({ data }: { data: Data }) {
       </section>
     );
   const meetings = data.meetings.filter((m) => m.book_id === book.id);
-  const reviews = data.reviews.filter((r) => r.book_id === book.id);
   const photos = data.photos
     .filter((p) => meetings.some((m) => m.id === p.meeting_id))
     .sort((a, b) => a.sort_order - b.sort_order);
@@ -34,11 +33,6 @@ export function BookPage({ data }: { data: Data }) {
           <span className={styles["tag"]}>{statuses[book.status]}</span>
           <h1 className={styles["page-title"]}>{book.title}</h1>
           <p className={styles["lead"]}>{book.author}</p>
-          <p className={styles["score"]}>
-            {book.final_rating === null
-              ? "Оценки пока нет"
-              : `★ ${Number(book.final_rating).toLocaleString("ru-RU")}`}
-          </p>
           <p className={styles["prose"]}>
             {book.description || "Описание книги пока не добавлено."}
           </p>
@@ -60,22 +54,6 @@ export function BookPage({ data }: { data: Data }) {
         </aside>
       </div>
       <div className={styles["sections"]}>
-        <div>
-          <h2>Отзывы</h2>
-          {reviews.length ? (
-            reviews.map((r) => (
-              <article className={styles["review"]} key={r.id}>
-                <strong>{r.author_name}</strong>
-                {r.rating !== null && (
-                  <span className={styles["score"]}> ★ {r.rating}</span>
-                )}
-                <p>{r.body}</p>
-              </article>
-            ))
-          ) : (
-            <p>Отзывов пока нет.</p>
-          )}
-        </div>
         <div>
           <h2>Фотографии со встречи</h2>
           {photos.length ? (

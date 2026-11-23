@@ -12,49 +12,34 @@ import {
   type Book,
   type Meeting,
   type Photo,
-  type Review,
   type Settings,
 } from "../../types";
 import { AdminForm } from "./AdminForm";
-type Row = Book | Meeting | Review;
+type Row = Meeting;
 import type { Tab, Form } from "./types";
 const titles: Record<Tab, string> = {
-  books: "Книги",
   meetings: "Встречи",
-  reviews: "Отзывы",
   settings: "Настройки клуба",
 };
 const initial: Record<Exclude<Tab, "settings">, Form> = {
-  books: {
+  meetings: {
     slug: "",
     title: "",
     author: "",
     description: "",
     status: "planned",
-    final_rating: "",
-    published: false,
     cover_path: "",
-  },
-  meetings: {
-    book_id: "",
     starts_at: "",
     place: "",
     price: "",
     notes: "",
     published: false,
   },
-  reviews: {
-    book_id: "",
-    author_name: "",
-    body: "",
-    rating: "",
-    published: false,
-  },
 };
-function toForm(row: Row): Form {
+function toForm(row: Row | Book, defaults: Form): Form {
   const result: Form = {};
   for (const [key, value] of Object.entries(row)) {
-    if (["id", "created_at", "updated_at"].includes(key)) continue;
+    if (!(key in defaults)) continue;
     result[key] =
       typeof value === "boolean"
         ? value
@@ -77,13 +62,12 @@ export default function Admin() {
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [tab, setTab] = useState<Tab>("books");
+  const [tab, setTab] = useState<Tab>("meetings");
   const [books, setBooks] = useState<Book[]>([]);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
-  const [reviews, setReviews] = useState<Review[]>([]);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
-  const [form, setForm] = useState<Form>(initial.books);
+  const [form, setForm] = useState<Form>(initial.meetings);
   const [id, setId] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -93,16 +77,14 @@ export default function Admin() {
     const result = await Promise.all([
       db.from("books").select("*").order("created_at"),
       db.from("meetings").select("*").order("starts_at"),
-      db.from("reviews").select("*").order("created_at"),
       db.from("meeting_photos").select("*").order("sort_order"),
       db.from("club_settings").select("*").maybeSingle(),
     ]);
     for (const r of result) if (r.error) throw r.error;
     setBooks(result[0].data as Book[]);
     setMeetings(result[1].data as Meeting[]);
-    setReviews(result[2].data as Review[]);
-    setPhotos(result[3].data as Photo[]);
-    setSettings(result[4].data as Settings | null);
+    setPhotos(result[2].data as Photo[]);
+    setSettings(result[3].data as Settings | null);
   }
   useEffect(() => {
     let alive = true;
@@ -199,27 +181,30 @@ export default function Admin() {
         if (error) throw error;
         saved = true;
       } else {
-        const payload: Record<string, unknown> = { ...form };
-        if (tab === "books") {
-          payload.final_rating =
-            form.final_rating === "" ? null : Number(form.final_rating);
-          if (file) {
-            newPath = await upload(file, "covers");
-            payload.cover_path = newPath;
-          } else payload.cover_path = form.cover_path || null;
-        }
-        if (tab === "reviews")
-          payload.rating = form.rating === "" ? null : Number(form.rating);
-        if (tab === "meetings") {
-          payload.starts_at = form.starts_at
+        if (file) newPath = await upload(file, "covers");
+        const book = {
+          slug: form.slug || `book-${crypto.randomUUID()}`,
+          title: form.title,
+          author: form.author,
+          description: form.description,
+          status: form.status,
+          cover_path: newPath || form.cover_path || null,
+          published: !!form.published,
+        };
+        const meeting = {
+          starts_at: form.starts_at
             ? new Date(String(form.starts_at)).toISOString()
-            : null;
-          payload.price = form.price === "" ? null : Number(form.price);
-        }
-        const query = id
-          ? db.from(tab).update(payload).eq("id", id)
-          : db.from(tab).insert(payload);
-        const { error } = await query;
+            : null,
+          place: form.place || null,
+          price: form.price === "" ? null : Number(form.price),
+          notes: form.notes,
+          published: !!form.published,
+        };
+        const { error } = await db.rpc("save_meeting_with_book", {
+          p_meeting_id: id || null,
+          p_book: book,
+          p_meeting: meeting,
+        });
         if (error) throw error;
         saved = true;
         if (newPath && form.cover_path)
@@ -245,37 +230,27 @@ export default function Admin() {
     }
   }
   async function remove(row: Row) {
+    const lastMeeting =
+      meetings.filter((m) => m.book_id === row.book_id).length === 1;
     if (
-      tab === "meetings" &&
-      meetings.filter((m) => m.book_id === (row as Meeting).book_id).length <= 1
-    ) {
-      setError(
-        "У книги должна быть хотя бы одна встреча. Сначала добавьте другую встречу или удалите книгу.",
-      );
+      !confirm(
+        lastMeeting
+          ? "Удалить встречу и связанную с ней книгу? Это действие нельзя отменить."
+          : "Удалить встречу? Это действие нельзя отменить.",
+      )
+    )
       return;
-    }
-    if (!confirm("Удалить запись? Это действие нельзя отменить.")) return;
     setBusy(true);
     setError("");
     try {
-      let paths: string[] = [];
-      if (tab === "books") {
-        const b = row as Book;
-        const related = meetings
-          .filter((m) => m.book_id === b.id)
-          .map((m) => m.id);
-        paths = [
-          ...(b.cover_path ? [b.cover_path] : []),
-          ...photos
-            .filter((p) => related.includes(p.meeting_id))
-            .map((p) => p.storage_path),
-        ];
-      }
-      if (tab === "meetings")
-        paths = photos
-          .filter((p) => p.meeting_id === row.id)
-          .map((p) => p.storage_path);
-      const { error } = await db.from(tab).delete().eq("id", row.id);
+      const paths = photos
+        .filter((p) => p.meeting_id === row.id)
+        .map((p) => p.storage_path);
+      const cover = books.find((book) => book.id === row.book_id)?.cover_path;
+      if (lastMeeting && cover) paths.push(cover);
+      const { error } = lastMeeting
+        ? await db.from("books").delete().eq("id", row.book_id)
+        : await db.from("meetings").delete().eq("id", row.id);
       if (error) throw error;
       await removeFiles(paths);
       await load();
@@ -386,14 +361,7 @@ export default function Admin() {
         <button onClick={() => void db.auth.signOut()}>Выйти</button>
       </section>
     );
-  const rows: Row[] =
-    tab === "books"
-      ? books
-      : tab === "meetings"
-        ? meetings
-        : tab === "reviews"
-          ? reviews
-          : [];
+  const rows: Row[] = tab === "meetings" ? meetings : [];
   return (
     <section className={styles["admin"]}>
       <div className={styles["admin-header"]}>
@@ -450,19 +418,19 @@ export default function Admin() {
                       className={styles["text-button"]}
                       onClick={() => {
                         setId(row.id);
+                        const book = books.find(
+                          (item) => item.id === row.book_id,
+                        );
                         setForm({
-                          ...initial[tab as Exclude<Tab, "settings">],
-                          ...toForm(row),
+                          ...initial.meetings,
+                          ...(book ? toForm(book, initial.meetings) : {}),
+                          ...toForm(row, initial.meetings),
                         });
                         setFile(null);
                         setSuccess("");
                       }}
                     >
-                      {"title" in row
-                        ? row.title
-                        : "author_name" in row
-                          ? row.author_name
-                          : `${books.find((b) => b.id === row.book_id)?.title || "Книга"} · ${row.starts_at ? new Date(row.starts_at).toLocaleDateString("ru-RU") : "дата уточняется"}`}
+                      {`${books.find((b) => b.id === row.book_id)?.title || "Книга"} · ${row.starts_at ? new Date(row.starts_at).toLocaleDateString("ru-RU") : "дата уточняется"}`}
                     </button>
                     <button
                       className={[styles["text-button"], styles["danger"]].join(
@@ -483,7 +451,6 @@ export default function Admin() {
           tab={tab}
           id={id}
           form={form}
-          books={books}
           photos={photos}
           busy={busy}
           change={change}

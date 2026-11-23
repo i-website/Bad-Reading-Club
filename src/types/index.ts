@@ -7,7 +7,6 @@ export interface Book {
   description: string;
   cover_path: string | null;
   status: Status;
-  final_rating: number | null;
   published: boolean;
 }
 export interface Meeting {
@@ -17,14 +16,6 @@ export interface Meeting {
   place: string | null;
   price: number | null;
   notes: string;
-  published: boolean;
-}
-export interface Review {
-  id: string;
-  book_id: string;
-  author_name: string;
-  body: string;
-  rating: number | null;
   published: boolean;
 }
 export interface Photo {
@@ -49,7 +40,6 @@ export const statuses: Record<Status, string> = {
 export type ClubData = {
   books: Book[];
   meetings: Meeting[];
-  reviews: Review[];
   photos: Photo[];
   settings: Settings | null;
 };

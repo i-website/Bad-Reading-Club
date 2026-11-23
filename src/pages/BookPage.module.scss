@@ -14,10 +14,6 @@
   line-height: 1.05;
   margin-bottom: 14px;
 }
-.score {
-  color: #24543a;
-  font-weight: 600;
-}
 .back {
   display: inline-block;
   margin-bottom: 32px;
@@ -54,20 +50,9 @@
   border-top: 1px solid #dfdfd6;
   margin-top: 60px;
   padding-top: 38px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
 }
 .sections h2 {
   font-size: 1.8rem;
-}
-.review {
-  padding: 20px 0;
-  border-bottom: 1px solid #deded5;
-}
-.review p {
-  white-space: pre-wrap;
-  margin: 8px 0;
 }
 .gallery {
   display: grid;
@@ -93,10 +78,6 @@
   }
   .book-cover {
     height: 240px;
-  }
-  .sections {
-    grid-template-columns: 1fr;
-    gap: 30px;
   }
 }
 @media (max-width: 520px) {

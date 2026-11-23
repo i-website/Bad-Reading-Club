@@ -5,7 +5,6 @@ import type {
   ClubData as Data,
   Book,
   Meeting,
-  Review,
   Photo,
   Settings,
 } from "../types";
@@ -13,13 +12,11 @@ import { Layout } from "../components/Layout";
 import { State } from "../components/State";
 import { Home } from "../pages/Home";
 import { Plans } from "../pages/Plans";
-import { Ratings } from "../pages/Ratings";
 import { BookPage } from "../pages/BookPage";
 const Admin = lazy(() => import("../features/admin/Admin"));
 const blank: Data = {
   books: [],
   meetings: [],
-  reviews: [],
   photos: [],
   settings: null,
 };
@@ -42,7 +39,6 @@ export default function App() {
         const results = await Promise.all([
           db.from("books").select("*").eq("published", true),
           db.from("meetings").select("*").eq("published", true),
-          db.from("reviews").select("*").eq("published", true),
           db.from("meeting_photos").select("*"),
           db.from("club_settings").select("*").maybeSingle(),
         ]);
@@ -51,9 +47,8 @@ export default function App() {
           setData({
             books: results[0].data as Book[],
             meetings: results[1].data as Meeting[],
-            reviews: results[2].data as Review[],
-            photos: results[3].data as Photo[],
-            settings: results[4].data as Settings | null,
+            photos: results[2].data as Photo[],
+            settings: results[3].data as Settings | null,
           });
       } catch (e) {
         if (active)
@@ -89,7 +84,6 @@ export default function App() {
                 <Routes>
                   <Route path="/" element={<Home data={data} />} />
                   <Route path="/plans" element={<Plans data={data} />} />
-                  <Route path="/ratings" element={<Ratings data={data} />} />
                   <Route
                     path="/books/:slug"
                     element={<BookPage data={data} />}

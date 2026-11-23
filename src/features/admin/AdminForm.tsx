@@ -1,14 +1,13 @@
 import styles from "./AdminForm.module.scss";
 import type { ChangeEvent, FormEvent } from "react";
 import { Media } from "../../components/Media";
-import { statuses, type Book, type Photo } from "../../types";
+import { statuses, type Photo } from "../../types";
 import type { Tab, Form } from "./types";
 
 type Props = {
   tab: Tab;
   id: string;
   form: Form;
-  books: Book[];
   photos: Photo[];
   busy: boolean;
   change: (name: string, value: string | boolean) => void;
@@ -21,7 +20,6 @@ export function AdminForm({
   tab,
   id,
   form,
-  books,
   photos,
   busy,
   change,
@@ -72,19 +70,11 @@ export function AdminForm({
             ? "Редактирование"
             : "Новая запись"}
       </h2>
-      {tab === "books" && !id && (
-        <p>
-          Для новой книги автоматически создаётся встреча. Дату и место можно
-          добавить в разделе «Встречи».
-        </p>
-      )}
-      {tab === "books" && (
+      {tab === "meetings" && (
         <>
+          <h3>Книга</h3>
           {text("title", "Название", { required: true })}
           {text("author", "Автор", { required: true })}
-          {text("slug", "Адрес книги (латиница, цифры и дефис)", {
-            required: true,
-          })}
           <label>
             Статус
             <select
@@ -99,9 +89,6 @@ export function AdminForm({
             </select>
           </label>
           {text("description", "Описание", { textarea: true })}
-          {text("final_rating", "Итоговая оценка от 0 до 5", {
-            type: "number",
-          })}
           <label>
             Обложка{" "}
             <input
@@ -119,26 +106,9 @@ export function AdminForm({
           )}
         </>
       )}
-      {(tab === "meetings" || tab === "reviews") && (
-        <label>
-          Книга
-          <select
-            required
-            disabled={tab === "meetings" && !!id}
-            value={String(form.book_id || "")}
-            onChange={(e) => change("book_id", e.target.value)}
-          >
-            <option value="">Выберите книгу</option>
-            {books.map((b) => (
-              <option value={b.id} key={b.id}>
-                {b.title}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
       {tab === "meetings" && (
         <>
+          <h3>Встреча</h3>
           {text("starts_at", "Дата и время", { type: "datetime-local" })}
           {text("place", "Место")}
           <label>
@@ -189,15 +159,6 @@ export function AdminForm({
               </div>
             </div>
           )}
-        </>
-      )}
-      {tab === "reviews" && (
-        <>
-          {text("author_name", "Имя или псевдоним", { required: true })}
-          {text("body", "Отзыв", { required: true, textarea: true })}
-          {text("rating", "Оценка автора отзыва от 0 до 5", {
-            type: "number",
-          })}
         </>
       )}
       {tab === "settings" && (

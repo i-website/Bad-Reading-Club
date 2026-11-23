@@ -1,11 +1,6 @@
 type RecordData = Record<string, unknown>;
 type Table =
-  | "books"
-  | "meetings"
-  | "reviews"
-  | "meeting_photos"
-  | "club_settings"
-  | "admin_users";
+  "books" | "meetings" | "meeting_photos" | "club_settings" | "admin_users";
 type Database = Record<Table, RecordData[]> & { files: Record<string, string> };
 const storageKey = "bad-reading-club-demo-v1";
 const meetingDate = new Date(Date.now() + 14 * 86400000).toISOString();
@@ -19,7 +14,6 @@ const seed: Database = {
       description:
         "История двух семей, их выбора и отношений. Книга для долгого разговора после прочтения.",
       status: "reading",
-      final_rating: null,
       cover_path: "demo/east.svg",
       published: true,
     },
@@ -31,7 +25,6 @@ const seed: Database = {
       description:
         "Роман о человеке, который оказывается перед лицом непостижимой судебной системы.",
       status: "planned",
-      final_rating: null,
       cover_path: "demo/trial.svg",
       published: true,
     },
@@ -42,7 +35,6 @@ const seed: Database = {
       author: "Фрэнсис Скотт Фицджеральд",
       description: "Роман о мечте, богатстве и иллюзиях.",
       status: "read",
-      final_rating: 4.6,
       cover_path: "demo/gatsby.svg",
       published: true,
     },
@@ -55,16 +47,6 @@ const seed: Database = {
       place: "Кафе «Пример»",
       price: 500,
       notes: "Демонстрационная встреча: дата и место приведены для примера.",
-      published: true,
-    },
-  ],
-  reviews: [
-    {
-      id: "demo-review-1",
-      book_id: "demo-book-3",
-      author_name: "Участник клуба",
-      body: "Пример отзыва: книга оставляет много тем для обсуждения.",
-      rating: null,
       published: true,
     },
   ],
@@ -193,7 +175,6 @@ class Query implements PromiseLike<{ data: unknown; error: null }> {
           .filter((row) => ids.includes(row.book_id))
           .map((row) => row.id);
         db.meetings = db.meetings.filter((row) => !ids.includes(row.book_id));
-        db.reviews = db.reviews.filter((row) => !ids.includes(row.book_id));
         db.meeting_photos = db.meeting_photos.filter(
           (row) => !meetingIds.includes(row.meeting_id),
         );
@@ -227,6 +208,55 @@ class Query implements PromiseLike<{ data: unknown; error: null }> {
 export const demoDb = {
   from(table: Table) {
     return new Query(table);
+  },
+  async rpc(
+    name: string,
+    args: {
+      p_meeting_id: string | null;
+      p_book: RecordData;
+      p_meeting: RecordData;
+    },
+  ) {
+    if (name !== "save_meeting_with_book")
+      return { data: null, error: { message: "Unknown operation" } };
+    const data = read();
+    const meeting = args.p_meeting_id
+      ? data.meetings.find((item) => item.id === args.p_meeting_id)
+      : undefined;
+    const book = meeting
+      ? data.books.find((item) => item.id === meeting.book_id)
+      : undefined;
+    if (args.p_meeting_id && (!meeting || !book))
+      return { data: null, error: { message: "Встреча не найдена." } };
+    if (
+      !args.p_book.title ||
+      !args.p_book.author ||
+      data.books.some(
+        (item) => item.slug === args.p_book.slug && item.id !== book?.id,
+      )
+    ) {
+      return {
+        data: null,
+        error: { message: "Проверьте название, автора и адрес книги." },
+      };
+    }
+    if (book && meeting) {
+      const wasPublished = book.published;
+      Object.assign(book, args.p_book, {
+        published: !!wasPublished || !!args.p_book.published,
+      });
+      Object.assign(meeting, args.p_meeting);
+    } else {
+      const bookId = crypto.randomUUID();
+      data.books.push({ id: bookId, ...args.p_book });
+      data.meetings.push({
+        id: crypto.randomUUID(),
+        book_id: bookId,
+        ...args.p_meeting,
+      });
+    }
+    write(data);
+    return { data: null, error: null };
   },
   auth: {
     async getSession() {
