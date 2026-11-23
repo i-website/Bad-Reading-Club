@@ -17,6 +17,7 @@ globalThis.sessionStorage = memoryStorage();
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
 let server;
 let demo;
+let isTwoGisUrl;
 
 before(async () => {
   server = await createServer({
@@ -25,6 +26,7 @@ before(async () => {
     optimizeDeps: { noDiscovery: true, include: [] },
   });
   demo = (await server.ssrLoadModule("/src/lib/demo.ts")).demoDb;
+  isTwoGisUrl = (await server.ssrLoadModule("/src/lib/place.ts")).isTwoGisUrl;
 });
 after(async () => {
   await server?.close();
@@ -180,4 +182,43 @@ test("publishing a draft makes its meeting and book public together", async () =
     ).data.published,
     true,
   );
+});
+
+test("2GIS links are validated and retained with the meeting", async () => {
+  assert.equal(isTwoGisUrl("https://2gis.ru/irkutsk/firm/123"), true);
+  assert.equal(isTwoGisUrl("https://go.2gis.com/example"), true);
+  assert.equal(isTwoGisUrl("https://2gis.ru.example.com/"), false);
+  assert.equal(isTwoGisUrl("javascript:alert(1)"), false);
+  const book = {
+    slug: "place-test",
+    title: "Book",
+    author: "Author",
+    description: "",
+    cover_path: null,
+    published: false,
+  };
+  const placeUrl = "https://2gis.ru/irkutsk/firm/123";
+  await demo.rpc("save_meeting_with_book", {
+    p_meeting_id: null,
+    p_book: book,
+    p_meeting: {
+      place: "Кафе",
+      place_url: placeUrl,
+      starts_at: null,
+      price: null,
+      notes: "",
+      published: false,
+    },
+  });
+  const savedBook = (
+    await demo.from("books").select("*").eq("slug", book.slug).maybeSingle()
+  ).data;
+  const savedMeeting = (
+    await demo
+      .from("meetings")
+      .select("*")
+      .eq("book_id", savedBook.id)
+      .maybeSingle()
+  ).data;
+  assert.equal(savedMeeting.place_url, placeUrl);
 });

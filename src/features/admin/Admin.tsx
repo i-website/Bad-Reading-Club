@@ -11,6 +11,7 @@ import {
 import { type Book, type Meeting, type Photo } from "../../types";
 import { AdminForm } from "./AdminForm";
 import { PublishDialog } from "./PublishDialog";
+import { isTwoGisUrl } from "../../lib/place";
 type Row = Meeting;
 import type { Form } from "./types";
 const initial: Record<"meetings", Form> = {
@@ -22,6 +23,7 @@ const initial: Record<"meetings", Form> = {
     cover_path: "",
     starts_at: "",
     place: "",
+    place_url: "",
     price: "",
     notes: "",
     published: false,
@@ -138,6 +140,10 @@ export default function Admin() {
     let newPath = "";
     let saved = false;
     try {
+      const placeUrl = String(form.place_url || "").trim();
+      if (placeUrl && !isTwoGisUrl(placeUrl)) {
+        throw new Error("Укажите ссылку на 2ГИС, начинающуюся с https://.");
+      }
       if (file) newPath = await upload(file, "covers");
       const book = {
         slug: form.slug || `book-${crypto.randomUUID()}`,
@@ -152,6 +158,7 @@ export default function Admin() {
           ? new Date(String(form.starts_at)).toISOString()
           : null,
         place: form.place || null,
+        place_url: placeUrl || null,
         price: form.price === "" ? null : Number(form.price),
         notes: form.notes,
         published: !!form.published,

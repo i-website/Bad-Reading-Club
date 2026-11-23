@@ -4,6 +4,7 @@ import type { ClubData as Data } from "../types";
 import { Media } from "../components/Media";
 import { formatDate as date, formatPrice } from "../lib/format";
 import { HomeWidgets } from "../features/home-widgets/HomeWidgets";
+import { PlaceLink } from "../components/PlaceLink";
 export function Home({ data }: { data: Data }) {
   const upcoming =
     data.meetings
@@ -53,7 +54,11 @@ export function Home({ data }: { data: Data }) {
                     <span>▦</span> {date(upcoming?.starts_at || null)}
                   </p>
                   <p>
-                    <span>⌾</span> {upcoming?.place || "Место уточняется"}
+                    <span>⌾</span>{" "}
+                    <PlaceLink
+                      place={upcoming?.place}
+                      url={upcoming?.place_url}
+                    />
                   </p>
                   {upcoming?.price != null && (
                     <p>

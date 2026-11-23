@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import type { ClubData as Data } from "../types";
 import { Media } from "../components/Media";
 import { formatDate as date, formatPrice } from "../lib/format";
+import { PlaceLink } from "../components/PlaceLink";
 export function BookPage({ data }: { data: Data }) {
   const { slug } = useParams();
   const book = data.books.find((b) => b.slug === slug);
@@ -41,7 +42,9 @@ export function BookPage({ data }: { data: Data }) {
             meetings.map((m) => (
               <div key={m.id}>
                 <p>▦ &nbsp; {date(m.starts_at)}</p>
-                <p>⌾ &nbsp; {m.place || "Место уточняется"}</p>
+                <p>
+                  ⌾ &nbsp; <PlaceLink place={m.place} url={m.place_url} />
+                </p>
                 {m.price != null && <p>Стоимость: {formatPrice(m.price)}</p>}
                 <p>{m.notes}</p>
               </div>

@@ -94,6 +94,9 @@ export function AdminForm({
         <h3>Встреча</h3>
         {text("starts_at", "Дата и время", { type: "datetime-local" })}
         {text("place", "Место")}
+        {text("place_url", "Ссылка на место в 2ГИС (необязательно)", {
+          type: "url",
+        })}
         <label>
           Стоимость, ₽ (необязательно)
           <input

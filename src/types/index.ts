@@ -12,6 +12,7 @@ export interface Meeting {
   book_id: string;
   starts_at: string | null;
   place: string | null;
+  place_url: string | null;
   price: number | null;
   notes: string;
   published: boolean;
