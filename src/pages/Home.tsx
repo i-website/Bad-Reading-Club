@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import type { ClubData as Data } from "../types";
 import { Media } from "../components/Media";
 import { formatDate as date, formatPrice } from "../lib/format";
+import { HomeWidgets } from "../features/home-widgets/HomeWidgets";
 export function Home({ data }: { data: Data }) {
   const upcoming =
     data.meetings
@@ -85,6 +86,7 @@ export function Home({ data }: { data: Data }) {
           )}
         </div>
       </section>
+      <HomeWidgets books={data.books} meetings={data.meetings} />
       <section id="about" className={styles["about"]}>
         <p className={styles["eyebrow"]}>О клубе</p>
         <h2>
