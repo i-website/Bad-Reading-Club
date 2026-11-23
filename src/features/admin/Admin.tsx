@@ -8,7 +8,7 @@ import {
   upload,
   removeFiles,
 } from "../../lib/supabase";
-import { type Book, type Meeting, type Photo } from "../../types";
+import { type Book, type Meeting } from "../../types";
 import { AdminForm } from "./AdminForm";
 import { PublishDialog } from "./PublishDialog";
 import { isTwoGisUrl } from "../../lib/place";
@@ -57,7 +57,6 @@ export default function Admin() {
   const [password, setPassword] = useState("");
   const [books, setBooks] = useState<Book[]>([]);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
-  const [photos, setPhotos] = useState<Photo[]>([]);
   const [form, setForm] = useState<Form>(initial.meetings);
   const [id, setId] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -70,12 +69,10 @@ export default function Admin() {
     const result = await Promise.all([
       db.from("books").select("*").order("created_at"),
       db.from("meetings").select("*").order("starts_at"),
-      db.from("meeting_photos").select("*").order("sort_order"),
     ]);
     for (const r of result) if (r.error) throw r.error;
     setBooks(result[0].data as Book[]);
     setMeetings(result[1].data as Meeting[]);
-    setPhotos(result[2].data as Photo[]);
   }
   useEffect(() => {
     let alive = true;
@@ -203,9 +200,7 @@ export default function Admin() {
     setBusy(true);
     setError("");
     try {
-      const paths = photos
-        .filter((p) => p.meeting_id === row.id)
-        .map((p) => p.storage_path);
+      const paths: string[] = [];
       const cover = books.find((book) => book.id === row.book_id)?.cover_path;
       if (lastMeeting && cover) paths.push(cover);
       const { error } = lastMeeting
@@ -246,49 +241,6 @@ export default function Admin() {
       setSuccess("Встреча опубликована.");
     } catch (error) {
       setPublishError(message(error));
-    } finally {
-      setBusy(false);
-    }
-  }
-  async function addPhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (!f || !id) return;
-    setBusy(true);
-    setError("");
-    let path = "";
-    try {
-      path = await upload(f, "photos");
-      const { error } = await db.from("meeting_photos").insert({
-        meeting_id: id,
-        storage_path: path,
-        caption: "",
-        sort_order: photos.filter((p) => p.meeting_id === id).length,
-      });
-      if (error) throw error;
-      path = "";
-      await load();
-      setSuccess("Фотография добавлена.");
-    } catch (err) {
-      if (path)
-        try {
-          await removeFiles([path]);
-        } catch {}
-      setError(message(err));
-    } finally {
-      setBusy(false);
-      e.target.value = "";
-    }
-  }
-  async function deletePhoto(p: Photo) {
-    if (!confirm("Удалить фотографию?")) return;
-    setBusy(true);
-    try {
-      const { error } = await db.from("meeting_photos").delete().eq("id", p.id);
-      if (error) throw error;
-      await removeFiles([p.storage_path]);
-      await load();
-    } catch (e) {
-      setError(message(e));
     } finally {
       setBusy(false);
     }
@@ -445,13 +397,10 @@ export default function Admin() {
             id={id}
             onNew={newMeeting}
             form={form}
-            photos={photos}
             busy={busy}
             change={change}
             save={save}
             setFile={setFile}
-            addPhoto={addPhoto}
-            deletePhoto={deletePhoto}
           />
         </div>
       </div>

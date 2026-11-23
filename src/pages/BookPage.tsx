@@ -15,9 +15,6 @@ export function BookPage({ data }: { data: Data }) {
       </section>
     );
   const meetings = data.meetings.filter((m) => m.book_id === book.id);
-  const photos = data.photos
-    .filter((p) => meetings.some((m) => m.id === p.meeting_id))
-    .sort((a, b) => a.sort_order - b.sort_order);
   return (
     <section>
       <Link className={styles["back"]} to="/plans">
@@ -53,26 +50,6 @@ export function BookPage({ data }: { data: Data }) {
             <p>Дата и место уточняются.</p>
           )}
         </aside>
-      </div>
-      <div className={styles["sections"]}>
-        <div>
-          <h2>Фотографии со встречи</h2>
-          {photos.length ? (
-            <div className={styles["gallery"]}>
-              {photos.map((p) => (
-                <figure key={p.id}>
-                  <Media
-                    path={p.storage_path}
-                    alt={p.caption || "Фото со встречи"}
-                  />
-                  {p.caption && <figcaption>{p.caption}</figcaption>}
-                </figure>
-              ))}
-            </div>
-          ) : (
-            <p>Фотографий пока нет.</p>
-          )}
-        </div>
       </div>
     </section>
   );

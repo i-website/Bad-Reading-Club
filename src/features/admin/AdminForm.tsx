@@ -1,32 +1,25 @@
 import styles from "./AdminForm.module.scss";
-import type { ChangeEvent, FormEvent } from "react";
+import type { FormEvent } from "react";
 import { Media } from "../../components/Media";
-import type { Photo } from "../../types";
 import type { Form } from "./types";
 
 type Props = {
   id: string;
   onNew: () => void;
   form: Form;
-  photos: Photo[];
   busy: boolean;
   change: (name: string, value: string | boolean) => void;
   save: (event: FormEvent) => void;
   setFile: (file: File | null) => void;
-  addPhoto: (event: ChangeEvent<HTMLInputElement>) => void;
-  deletePhoto: (photo: Photo) => void;
 };
 export function AdminForm({
   id,
   onNew,
   form,
-  photos,
   busy,
   change,
   save,
   setFile,
-  addPhoto,
-  deletePhoto,
 }: Props) {
   const text = (
     name: string,
@@ -109,41 +102,6 @@ export function AdminForm({
           />
         </label>
         {text("notes", "Примечания", { textarea: true })}
-        {id && (
-          <div>
-            <label>
-              Добавить фотографию
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={(e) => void addPhoto(e)}
-                disabled={busy}
-              />
-            </label>
-            <div className={styles["photo-admin"]}>
-              {photos
-                .filter((p) => p.meeting_id === id)
-                .map((p) => (
-                  <div key={p.id}>
-                    <Media
-                      path={p.storage_path}
-                      alt="Фото встречи"
-                      className={styles["thumb"]}
-                    />
-                    <button
-                      type="button"
-                      className={[styles["text-button"], styles["danger"]].join(
-                        " ",
-                      )}
-                      onClick={() => void deletePhoto(p)}
-                    >
-                      Удалить фото
-                    </button>
-                  </div>
-                ))}
-            </div>
-          </div>
-        )}
       </>
       <button disabled={busy}>{busy ? "Сохраняем…" : "Сохранить"}</button>
     </form>

@@ -1,13 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { configured, db, message } from "../lib/supabase";
-import type {
-  ClubData as Data,
-  Book,
-  Meeting,
-  Photo,
-  Settings,
-} from "../types";
+import type { ClubData as Data, Book, Meeting, Settings } from "../types";
 import { Layout } from "../components/Layout";
 import { State } from "../components/State";
 import { Home } from "../pages/Home";
@@ -17,7 +11,6 @@ const Admin = lazy(() => import("../features/admin/Admin"));
 const blank: Data = {
   books: [],
   meetings: [],
-  photos: [],
   settings: null,
 };
 export default function App() {
@@ -39,7 +32,6 @@ export default function App() {
         const results = await Promise.all([
           db.from("books").select("*").eq("published", true),
           db.from("meetings").select("*").eq("published", true),
-          db.from("meeting_photos").select("*"),
           db.from("club_settings").select("*").maybeSingle(),
         ]);
         for (const r of results) if (r.error) throw r.error;
@@ -47,8 +39,7 @@ export default function App() {
           setData({
             books: results[0].data as Book[],
             meetings: results[1].data as Meeting[],
-            photos: results[2].data as Photo[],
-            settings: results[3].data as Settings | null,
+            settings: results[2].data as Settings | null,
           });
       } catch (e) {
         if (active)

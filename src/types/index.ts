@@ -17,13 +17,6 @@ export interface Meeting {
   notes: string;
   published: boolean;
 }
-export interface Photo {
-  id: string;
-  meeting_id: string;
-  storage_path: string;
-  caption: string;
-  sort_order: number;
-}
 export interface Settings {
   id: number;
   name: string;
@@ -33,6 +26,5 @@ export interface Settings {
 export type ClubData = {
   books: Book[];
   meetings: Meeting[];
-  photos: Photo[];
   settings: Settings | null;
 };

@@ -46,28 +46,6 @@
   white-space: pre-wrap;
   max-width: 650px;
 }
-.sections {
-  border-top: 1px solid #dfdfd6;
-  margin-top: 60px;
-  padding-top: 38px;
-}
-.sections h2 {
-  font-size: 1.8rem;
-}
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-.gallery img {
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: 6px;
-}
-.gallery figure {
-  margin: 0;
-}
 @media (max-width: 800px) {
   .book-hero {
     grid-template-columns: 160px 1fr;

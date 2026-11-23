@@ -19,7 +19,7 @@ export function message(error: unknown) {
       ? String(error.message)
       : "Не удалось выполнить запрос. Проверьте подключение и попробуйте снова.";
 }
-export async function upload(file: File, folder: "covers" | "photos") {
+export async function upload(file: File, folder: "covers") {
   if (
     !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
     file.size > 10 * 1024 * 1024
