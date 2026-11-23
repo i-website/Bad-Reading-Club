@@ -1,8 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
+import { demoDb } from './demo'
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined
-export const configured = Boolean(url && key)
-export const db = createClient(url || 'https://example.supabase.co', key || 'missing-key')
+export const demoMode = import.meta.env.VITE_DEMO_MODE === 'true' || !(url && key)
+export const configured = true
+const realDb = createClient(url || 'https://example.supabase.co', key || 'missing-key')
+export const db = demoMode ? demoDb as unknown as typeof realDb : realDb
 export const fileUrl = (path:string|null) => path ? db.storage.from('club-media').getPublicUrl(path).data.publicUrl : ''
 export function message(error:unknown) { return error instanceof Error ? error.message : typeof error === 'object' && error && 'message' in error ? String(error.message) : 'Не удалось выполнить запрос. Проверьте подключение и попробуйте снова.' }
 export async function upload(file:File, folder:'covers'|'photos') {
