@@ -9,10 +9,6 @@
   text-align: center;
   font-size: 0.94rem;
 }
-.outline {
-  background: transparent;
-  color: var(--club-green-text);
-}
 .button:hover {
   filter: brightness(0.94);
 }
@@ -83,18 +79,6 @@
   color: var(--club-green-dark);
   display: inline-block;
   width: 28px;
-}
-.about {
-  border-top: 1px solid #dcded5;
-  max-width: 100%;
-  padding: 70px 0 100px;
-}
-.about h2 {
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  color: var(--club-green-dark);
-}
-.about p:last-child {
-  max-width: 600px;
 }
 @media (max-width: 800px) {
   .intro {

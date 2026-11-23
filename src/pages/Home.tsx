@@ -32,16 +32,6 @@ export function Home({ data }: { data: Data }) {
             <Link className={styles["button"]} to="/plans">
               Планы клуба
             </Link>
-            <button
-              className={styles["outline"]}
-              onClick={() =>
-                document
-                  .getElementById("about")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
-            >
-              О клубе
-            </button>
           </div>
         </div>
         <div className={styles["feature"]}>
@@ -87,15 +77,6 @@ export function Home({ data }: { data: Data }) {
         </div>
       </section>
       <HomeWidgets books={data.books} meetings={data.meetings} />
-      <section id="about" className={styles["about"]}>
-        <p className={styles["eyebrow"]}>О клубе</p>
-        <h2>
-          Книги становятся ближе,
-          <br />
-          когда есть с кем обсудить.
-        </h2>
-        <p>{data.settings?.description || "Читаем, обсуждаем, встречаемся."}</p>
-      </section>
     </>
   );
 }
