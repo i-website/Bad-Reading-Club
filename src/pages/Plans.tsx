@@ -1,6 +1,6 @@
 import styles from "./Plans.module.scss";
 import { Link } from "react-router-dom";
-import { statuses, type Book, type Meeting } from "../types";
+import { type Book, type Meeting } from "../types";
 import type { ClubData as Data } from "../types";
 import { Media } from "../components/Media";
 import { formatDate as date } from "../lib/format";
@@ -44,7 +44,6 @@ export function Plans({ data }: { data: Data }) {
                 {m?.price != null && (
                   <small>Стоимость: {formatPrice(m.price)}</small>
                 )}
-                <small>{statuses[b.status]}</small>
               </div>
               <span aria-hidden="true">›</span>
             </Link>

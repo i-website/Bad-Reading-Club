@@ -70,7 +70,6 @@ test("one operation creates and edits a meeting together with its book", async (
     slug: "combined-test",
     title: "First title",
     author: "Author",
-    status: "planned",
     description: "",
     published: true,
     cover_path: null,

@@ -1,7 +1,6 @@
 import styles from "./BookPage.module.scss";
 import { Link, useParams } from "react-router-dom";
 import type { ClubData as Data } from "../types";
-import { statuses } from "../types";
 import { Media } from "../components/Media";
 import { formatDate as date, formatPrice } from "../lib/format";
 export function BookPage({ data }: { data: Data }) {
@@ -30,7 +29,6 @@ export function BookPage({ data }: { data: Data }) {
           className={styles["book-cover"]}
         />
         <div>
-          <span className={styles["tag"]}>{statuses[book.status]}</span>
           <h1 className={styles["page-title"]}>{book.title}</h1>
           <p className={styles["lead"]}>{book.author}</p>
           <p className={styles["prose"]}>

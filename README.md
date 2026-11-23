@@ -18,7 +18,7 @@ npm run build
 
 ## Supabase
 
-1. Создайте проект Supabase. В SQL Editor выполните `supabase/migration.sql`, затем `supabase/002_book_meetings.sql` и `supabase/003_meeting_price.sql`, `supabase/004_remove_reviews_and_ratings.sql` и `supabase/005_save_meeting_with_book.sql` по одному разу. Если предыдущие миграции уже применены, выполните только недостающие. Миграция создаёт таблицы, RLS, приватный bucket `club-media`, политики Storage и единственную начальную книгу «К востоку от Эдема». Даты и адреса не выдуманы.
+1. Создайте проект Supabase. В SQL Editor выполните `supabase/migration.sql`, затем `supabase/002_book_meetings.sql` и `supabase/003_meeting_price.sql`, `supabase/004_remove_reviews_and_ratings.sql` и `supabase/005_save_meeting_with_book.sql` и `supabase/006_remove_book_status.sql` по одному разу. Если предыдущие миграции уже применены, выполните только недостающие. Миграция создаёт таблицы, RLS, приватный bucket `club-media`, политики Storage и единственную начальную книгу «К востоку от Эдема». Даты и адреса не выдуманы.
 2. В Authentication отключите публичную регистрацию (Allow new users to sign up), затем создайте пользователя администратора через панель Authentication → Users → Add user, задав email и пароль. Подтвердите email при создании. В SQL Editor вручную назначьте администратора, подставив UUID из списка пользователей:
 
 ```sql

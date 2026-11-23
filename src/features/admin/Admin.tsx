@@ -27,7 +27,6 @@ const initial: Record<Exclude<Tab, "settings">, Form> = {
     title: "",
     author: "",
     description: "",
-    status: "planned",
     cover_path: "",
     starts_at: "",
     place: "",
@@ -187,7 +186,6 @@ export default function Admin() {
           title: form.title,
           author: form.author,
           description: form.description,
-          status: form.status,
           cover_path: newPath || form.cover_path || null,
           published: !!form.published,
         };

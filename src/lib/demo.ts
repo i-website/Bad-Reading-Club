@@ -13,7 +13,6 @@ const seed: Database = {
       author: "Джон Стейнбек",
       description:
         "История двух семей, их выбора и отношений. Книга для долгого разговора после прочтения.",
-      status: "reading",
       cover_path: "demo/east.svg",
       published: true,
     },
@@ -24,7 +23,6 @@ const seed: Database = {
       author: "Франц Кафка",
       description:
         "Роман о человеке, который оказывается перед лицом непостижимой судебной системы.",
-      status: "planned",
       cover_path: "demo/trial.svg",
       published: true,
     },
@@ -34,7 +32,6 @@ const seed: Database = {
       title: "Великий Гэтсби",
       author: "Фрэнсис Скотт Фицджеральд",
       description: "Роман о мечте, богатстве и иллюзиях.",
-      status: "read",
       cover_path: "demo/gatsby.svg",
       published: true,
     },

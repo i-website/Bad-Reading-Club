@@ -1,4 +1,3 @@
-export type Status = "planned" | "reading" | "read";
 export interface Book {
   id: string;
   slug: string;
@@ -6,7 +5,6 @@ export interface Book {
   author: string;
   description: string;
   cover_path: string | null;
-  status: Status;
   published: boolean;
 }
 export interface Meeting {
@@ -31,12 +29,6 @@ export interface Settings {
   description: string;
   links: { label: string; url: string }[];
 }
-export const statuses: Record<Status, string> = {
-  planned: "В планах",
-  reading: "Читаем",
-  read: "Прочитано",
-};
-
 export type ClubData = {
   books: Book[];
   meetings: Meeting[];

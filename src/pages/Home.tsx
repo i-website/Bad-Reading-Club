@@ -4,13 +4,14 @@ import type { ClubData as Data } from "../types";
 import { Media } from "../components/Media";
 import { formatDate as date, formatPrice } from "../lib/format";
 export function Home({ data }: { data: Data }) {
-  const upcoming = data.meetings
-    .filter((m) => m.starts_at && new Date(m.starts_at).getTime() >= Date.now())
-    .sort((a, b) => a.starts_at!.localeCompare(b.starts_at!))[0];
-  const book =
-    data.books.find((b) => b.id === upcoming?.book_id) ||
-    data.books.find((b) => b.status === "reading") ||
-    data.books.find((b) => b.status === "planned");
+  const upcoming =
+    data.meetings
+      .filter(
+        (m) => m.starts_at && new Date(m.starts_at).getTime() >= Date.now(),
+      )
+      .sort((a, b) => a.starts_at!.localeCompare(b.starts_at!))[0] ||
+    data.meetings.find((m) => !m.starts_at);
+  const book = data.books.find((b) => b.id === upcoming?.book_id);
   return (
     <>
       <section className={styles["hero"]}>
@@ -52,7 +53,7 @@ export function Home({ data }: { data: Data }) {
               />
               <div>
                 <span className={styles["tag"]}>
-                  {upcoming ? "Следующая встреча" : "Сейчас читаем"}
+                  {upcoming?.starts_at ? "Следующая встреча" : "Встреча клуба"}
                 </span>
                 <h2>{book.title}</h2>
                 <p>{book.author}</p>

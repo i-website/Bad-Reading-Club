@@ -1,7 +1,7 @@
 import styles from "./AdminForm.module.scss";
 import type { ChangeEvent, FormEvent } from "react";
 import { Media } from "../../components/Media";
-import { statuses, type Photo } from "../../types";
+import type { Photo } from "../../types";
 import type { Tab, Form } from "./types";
 
 type Props = {
@@ -75,19 +75,6 @@ export function AdminForm({
           <h3>Книга</h3>
           {text("title", "Название", { required: true })}
           {text("author", "Автор", { required: true })}
-          <label>
-            Статус
-            <select
-              value={String(form.status)}
-              onChange={(e) => change("status", e.target.value)}
-            >
-              {Object.entries(statuses).map(([k, v]) => (
-                <option value={k} key={k}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </label>
           {text("description", "Описание", { textarea: true })}
           <label>
             Обложка{" "}
