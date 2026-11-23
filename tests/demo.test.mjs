@@ -125,3 +125,59 @@ test("one operation creates and edits a meeting together with its book", async (
   assert.equal(updatedBook.data.title, "Changed");
   assert.equal(updatedMeeting.data.price, 300);
 });
+
+test("publishing a draft makes its meeting and book public together", async () => {
+  const book = {
+    slug: "draft-test",
+    title: "Draft",
+    author: "Author",
+    description: "",
+    cover_path: null,
+    published: false,
+  };
+  const meeting = {
+    starts_at: null,
+    place: null,
+    price: null,
+    notes: "",
+    published: false,
+  };
+  await demo.rpc("save_meeting_with_book", {
+    p_meeting_id: null,
+    p_book: book,
+    p_meeting: meeting,
+  });
+  const savedBook = (
+    await demo.from("books").select("*").eq("slug", book.slug).maybeSingle()
+  ).data;
+  const savedMeeting = (
+    await demo
+      .from("meetings")
+      .select("*")
+      .eq("book_id", savedBook.id)
+      .maybeSingle()
+  ).data;
+  assert.equal(savedBook.published, false);
+  assert.equal(savedMeeting.published, false);
+  const result = await demo.rpc("save_meeting_with_book", {
+    p_meeting_id: savedMeeting.id,
+    p_book: { ...savedBook, published: true },
+    p_meeting: { ...savedMeeting, published: true },
+  });
+  assert.equal(result.error, null);
+  assert.equal(
+    (await demo.from("books").select("*").eq("id", savedBook.id).maybeSingle())
+      .data.published,
+    true,
+  );
+  assert.equal(
+    (
+      await demo
+        .from("meetings")
+        .select("*")
+        .eq("id", savedMeeting.id)
+        .maybeSingle()
+    ).data.published,
+    true,
+  );
+});

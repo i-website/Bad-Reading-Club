@@ -10,6 +10,7 @@ import {
 } from "../../lib/supabase";
 import { type Book, type Meeting, type Photo } from "../../types";
 import { AdminForm } from "./AdminForm";
+import { PublishDialog } from "./PublishDialog";
 type Row = Meeting;
 import type { Form } from "./types";
 const initial: Record<"meetings", Form> = {
@@ -61,6 +62,8 @@ export default function Admin() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [publishing, setPublishing] = useState<Meeting | null>(null);
+  const [publishError, setPublishError] = useState("");
   async function load() {
     const result = await Promise.all([
       db.from("books").select("*").order("created_at"),
@@ -213,6 +216,33 @@ export default function Admin() {
       setBusy(false);
     }
   }
+  async function publishMeeting() {
+    if (!publishing) return;
+    const book = books.find((item) => item.id === publishing.book_id);
+    if (!book) {
+      setPublishError("Книга для этой встречи не найдена.");
+      return;
+    }
+    setBusy(true);
+    setPublishError("");
+    try {
+      const { error } = await db.rpc("save_meeting_with_book", {
+        p_meeting_id: publishing.id,
+        p_book: { ...book, published: true },
+        p_meeting: { ...publishing, published: true },
+      });
+      if (error) throw error;
+      if (id === publishing.id)
+        setForm((current) => ({ ...current, published: true }));
+      await load();
+      setPublishing(null);
+      setSuccess("Встреча опубликована.");
+    } catch (error) {
+      setPublishError(message(error));
+    } finally {
+      setBusy(false);
+    }
+  }
   async function addPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f || !id) return;
@@ -311,7 +341,60 @@ export default function Admin() {
         <button onClick={() => void db.auth.signOut()}>Выйти</button>
       </section>
     );
-  const rows: Row[] = meetings;
+  const drafts = meetings.filter((meeting) => !meeting.published);
+  const published = meetings.filter((meeting) => meeting.published);
+  function meetingList(rows: Row[], isDraft: boolean) {
+    if (!rows.length) return <p>Встреч пока нет.</p>;
+    return (
+      <div className={styles["admin-list"]}>
+        {rows.map((row) => (
+          <div key={row.id}>
+            <button
+              className={styles["text-button"]}
+              onClick={() => {
+                setId(row.id);
+                const book = books.find((item) => item.id === row.book_id);
+                setForm({
+                  ...initial.meetings,
+                  ...(book ? toForm(book, initial.meetings) : {}),
+                  ...toForm(row, initial.meetings),
+                });
+                setFile(null);
+                setSuccess("");
+                if (window.matchMedia("(max-width: 800px)").matches)
+                  document
+                    .getElementById("meeting-form")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+            >
+              {`${books.find((book) => book.id === row.book_id)?.title || "Книга"} · ${row.starts_at ? new Date(row.starts_at).toLocaleDateString("ru-RU") : "дата уточняется"}`}
+            </button>
+            <div className={styles["row-actions"]}>
+              {isDraft && (
+                <button
+                  className={styles["text-button"]}
+                  disabled={busy}
+                  onClick={() => {
+                    setPublishError("");
+                    setPublishing(row);
+                  }}
+                >
+                  Опубликовать
+                </button>
+              )}
+              <button
+                className={[styles["text-button"], styles["danger"]].join(" ")}
+                disabled={busy}
+                onClick={() => void remove(row)}
+              >
+                Удалить
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
   return (
     <section className={styles["admin"]}>
       <div className={styles["admin-header"]}>
@@ -340,59 +423,45 @@ export default function Admin() {
         </p>
       )}
       <div className={styles["admin-grid"]}>
-        <div>
-          <>
-            <h2>Встречи</h2>
-            <button className={styles["outline"]} onClick={newMeeting}>
-              Добавить
-            </button>
-            <div className={styles["admin-list"]}>
-              {rows.map((row) => (
-                <div key={row.id}>
-                  <button
-                    className={styles["text-button"]}
-                    onClick={() => {
-                      setId(row.id);
-                      const book = books.find(
-                        (item) => item.id === row.book_id,
-                      );
-                      setForm({
-                        ...initial.meetings,
-                        ...(book ? toForm(book, initial.meetings) : {}),
-                        ...toForm(row, initial.meetings),
-                      });
-                      setFile(null);
-                      setSuccess("");
-                    }}
-                  >
-                    {`${books.find((b) => b.id === row.book_id)?.title || "Книга"} · ${row.starts_at ? new Date(row.starts_at).toLocaleDateString("ru-RU") : "дата уточняется"}`}
-                  </button>
-                  <button
-                    className={[styles["text-button"], styles["danger"]].join(
-                      " ",
-                    )}
-                    disabled={busy}
-                    onClick={() => void remove(row)}
-                  >
-                    Удалить
-                  </button>
-                </div>
-              ))}
-            </div>
-          </>
+        <div className={styles["meetings"]}>
+          <h2>Встречи</h2>
+          <button className={styles["outline"]} onClick={newMeeting}>
+            Добавить
+          </button>
+          <section className={styles["group"]} aria-labelledby="drafts-title">
+            <h3 id="drafts-title">Неопубликованные ({drafts.length})</h3>
+            {meetingList(drafts, true)}
+          </section>
+          <details className={styles["group"]}>
+            <summary>Опубликованные ({published.length})</summary>
+            {meetingList(published, false)}
+          </details>
         </div>
-        <AdminForm
-          id={id}
-          form={form}
-          photos={photos}
-          busy={busy}
-          change={change}
-          save={save}
-          setFile={setFile}
-          addPhoto={addPhoto}
-          deletePhoto={deletePhoto}
-        />
+        <div id="meeting-form" className={styles["form"]}>
+          <AdminForm
+            id={id}
+            form={form}
+            photos={photos}
+            busy={busy}
+            change={change}
+            save={save}
+            setFile={setFile}
+            addPhoto={addPhoto}
+            deletePhoto={deletePhoto}
+          />
+        </div>
       </div>
+      {publishing && (
+        <PublishDialog
+          title={
+            books.find((book) => book.id === publishing.book_id)?.title || ""
+          }
+          busy={busy}
+          error={publishError}
+          onCancel={() => setPublishing(null)}
+          onConfirm={() => void publishMeeting()}
+        />
+      )}
     </section>
   );
 }

@@ -135,14 +135,6 @@ export function AdminForm({
           </div>
         )}
       </>
-      <label className={styles["check"]}>
-        <input
-          type="checkbox"
-          checked={!!form.published}
-          onChange={(e) => change("published", e.target.checked)}
-        />
-        Опубликовать
-      </label>
       <button disabled={busy}>{busy ? "Сохраняем…" : "Сохранить"}</button>
     </form>
   );

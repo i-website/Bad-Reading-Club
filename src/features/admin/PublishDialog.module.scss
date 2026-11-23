@@ -1,0 +1,29 @@
+﻿.dialog {
+  border: 1px solid #d9d7ce;
+  border-radius: 14px;
+  padding: 28px;
+  width: min(90vw, 480px);
+  background: #f4f0ea;
+  color: #17211b;
+}
+.dialog::backdrop {
+  background: rgb(0 0 0 / 48%);
+}
+.dialog h2 {
+  font-size: 1.8rem;
+  margin-bottom: 16px;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+.cancel {
+  background: transparent;
+  color: var(--club-green-text);
+}
+.error {
+  color: #9a352c;
+}
