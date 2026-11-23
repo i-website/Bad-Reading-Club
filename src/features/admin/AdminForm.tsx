@@ -6,6 +6,7 @@ import type { Form } from "./types";
 
 type Props = {
   id: string;
+  onNew: () => void;
   form: Form;
   photos: Photo[];
   busy: boolean;
@@ -17,6 +18,7 @@ type Props = {
 };
 export function AdminForm({
   id,
+  onNew,
   form,
   photos,
   busy,
@@ -62,6 +64,11 @@ export function AdminForm({
   return (
     <form className={styles["editor"]} onSubmit={save}>
       <h2>{id ? "Редактирование" : "Новая встреча"}</h2>
+      {id && (
+        <button type="button" className={styles["new-meeting"]} onClick={onNew}>
+          Создать новую встречу
+        </button>
+      )}
       <>
         <h3>Книга</h3>
         {text("title", "Название", { required: true })}

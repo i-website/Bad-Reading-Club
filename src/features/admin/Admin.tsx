@@ -424,10 +424,6 @@ export default function Admin() {
       )}
       <div className={styles["admin-grid"]}>
         <div className={styles["meetings"]}>
-          <h2>Встречи</h2>
-          <button className={styles["outline"]} onClick={newMeeting}>
-            Добавить
-          </button>
           <section className={styles["group"]} aria-labelledby="drafts-title">
             <h3 id="drafts-title">Неопубликованные ({drafts.length})</h3>
             {meetingList(drafts, true)}
@@ -440,6 +436,7 @@ export default function Admin() {
         <div id="meeting-form" className={styles["form"]}>
           <AdminForm
             id={id}
+            onNew={newMeeting}
             form={form}
             photos={photos}
             busy={busy}
