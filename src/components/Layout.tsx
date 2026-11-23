@@ -50,12 +50,6 @@ export function Layout({
           >
             Планы
           </NavLink>
-          <NavLink
-            to="/admin"
-            className={({ isActive }) => (isActive ? styles.active : undefined)}
-          >
-            Админка
-          </NavLink>
         </nav>
       </header>
       <main>{children}</main>
