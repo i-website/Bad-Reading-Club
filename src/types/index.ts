@@ -16,6 +16,8 @@ export interface Meeting {
   price: number | null;
   notes: string;
   published: boolean;
+  /** Historical mock meetings without an exact date. */
+  is_past?: boolean;
 }
 export interface Settings {
   id: number;

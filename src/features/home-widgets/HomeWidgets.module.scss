@@ -5,10 +5,11 @@
   padding: 0 0 76px;
 }
 .widget {
-  border: 1px solid #d9d7ce;
+  border: 1px solid #eee0d8;
   border-radius: 18px;
   padding: 28px;
   min-width: 0;
+  background: #fff9f4;
 }
 .widget h2 {
   font-size: 2rem;
@@ -38,14 +39,20 @@
   white-space: nowrap;
 }
 .list {
-  border-top: 1px solid #deded5;
+  display: grid;
+  gap: 8px;
 }
 .row {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 12px 0;
-  border-bottom: 1px solid #deded5;
+  padding: 12px 16px;
+  border: 1px solid #eee4dc;
+  border-radius: 12px;
+  background: #fff9f4;
+}
+.row:hover {
+  background: #e3ece5;
 }
 .cover {
   width: 48px;

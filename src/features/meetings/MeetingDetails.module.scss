@@ -1,0 +1,30 @@
+﻿.details .heading {
+  font-size: 1.4rem;
+  line-height: 1.2;
+  margin: 0 0 14px;
+}
+.rows {
+  display: grid;
+  gap: 16px;
+}
+.detail {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.detail svg {
+  flex: none;
+  margin-top: 2px;
+}
+.weekday {
+  display: block;
+  margin-top: 4px;
+  color: #687b70;
+  font-size: 0.85rem;
+}
+.muted {
+  color: #687b70;
+}
+.details .note {
+  margin: 0;
+}

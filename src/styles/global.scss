@@ -1,11 +1,13 @@
 @import "tailwindcss" layer(tailwind);
 :root {
-  --club-green: #1d4733;
-  --club-green-dark: #1d4733;
-  --club-green-text: #1d4733;
+  --club-green: #0b523d;
+  --club-green-dark: #0b523d;
+  --club-green-text: #143e30;
+  --club-background: #faf2ea;
+  --club-accent: var(--club-green-dark);
   font-family: Arial, sans-serif;
   color: var(--club-green-text);
-  background: #f4f0ea;
+  background: var(--club-background);
   font-synthesis: none;
 }
 * {
@@ -51,15 +53,16 @@ select:focus-visible {
   outline-offset: 3px;
 }
 header {
-  max-width: 1400px;
+  max-width: none;
   margin: auto;
   min-height: 90px;
-  padding: 0 5%;
+  padding: 0 max(5%, calc((100% - 1400px) / 2));
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 30px;
-  border-bottom: 1px solid #e4e1d9;
+  background: var(--club-green-dark);
+  color: var(--club-background);
 }
 nav {
   display: flex;
@@ -78,7 +81,7 @@ main {
   padding: 0 5%;
 }
 section {
-  padding: 74px 0;
+  padding: 32px 0 74px;
 }
 h1,
 h2,
@@ -89,8 +92,8 @@ p {
 h1,
 h2,
 h3 {
-  font-family: Georgia, "Times New Roman", serif;
-  font-weight: 400;
+  font-family: Arial, sans-serif;
+  font-weight: 700;
 }
 h1 {
   color: var(--club-green-dark);
@@ -157,6 +160,6 @@ textarea {
 }
 @media (max-width: 520px) {
   section {
-    padding: 48px 0;
+    padding: 24px 0;
   }
 }

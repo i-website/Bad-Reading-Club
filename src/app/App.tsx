@@ -7,6 +7,8 @@ import { State } from "../components/State";
 import { Home } from "../pages/Home";
 import { Plans } from "../pages/Plans";
 import { BookPage } from "../pages/BookPage";
+import { MeetingPage } from "../pages/MeetingPage";
+import { RatingsPage } from "../pages/RatingsPage";
 const Admin = lazy(() => import("../features/admin/Admin"));
 const blank: Data = {
   books: [],
@@ -76,8 +78,16 @@ export default function App() {
                   <Route path="/" element={<Home data={data} />} />
                   <Route path="/plans" element={<Plans data={data} />} />
                   <Route
+                    path="/ratings"
+                    element={<RatingsPage data={data} />}
+                  />
+                  <Route
                     path="/books/:slug"
                     element={<BookPage data={data} />}
+                  />
+                  <Route
+                    path="/meetings/:id"
+                    element={<MeetingPage data={data} />}
                   />
                   <Route path="*" element={<p>Страница не найдена.</p>} />
                 </Routes>

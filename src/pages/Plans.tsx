@@ -1,56 +1,83 @@
 import styles from "./Plans.module.scss";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { type Book, type Meeting } from "../types";
 import type { ClubData as Data } from "../types";
 import { Media } from "../components/Media";
-import { formatDate as date } from "../lib/format";
+import { formatDate as date, isUpcomingMeeting } from "../lib/format";
 import { formatPrice } from "../lib/format";
+import { buildSchedule } from "../lib/schedule";
 export function Plans({ data }: { data: Data }) {
-  const items = data.books
-    .map((b) => ({
-      b,
-      m: data.meetings
-        .filter((m) => m.book_id === b.id)
-        .sort((a, b) =>
-          (a.starts_at || "9999").localeCompare(b.starts_at || "9999"),
-        ),
-    }))
-    .flatMap<{ b: Book; m: Meeting | null }>(({ b, m }) =>
-      m.length ? m.map((x) => ({ b, m: x })) : [{ b, m: null }],
-    )
-    .sort((a, b) =>
-      (a.m?.starts_at || "9999").localeCompare(b.m?.starts_at || "9999"),
-    );
+  const [showPast, setShowPast] = useState(false);
+  const now = Date.now();
+  const { items, nextMeetingId } = buildSchedule(data, showPast, now);
   return (
     <section>
       <p className={styles["eyebrow"]}>Встречи и книги</p>
-      <h1 className={styles["page-title"]}>Планы клуба</h1>
+      <h1 className={styles["page-title"]}>Расписание клуба</h1>
       <p className={styles["subtitle"]}>Что и когда мы читаем</p>
+      <button
+        type="button"
+        className={styles.toggle}
+        aria-pressed={showPast}
+        onClick={() => setShowPast((value) => !value)}
+      >
+        {showPast ? "Скрыть прошедшие" : "Показать прошедшие"}
+      </button>
       {items.length ? (
         <div className={styles["list"]}>
-          {items.map(({ b, m }) => (
-            <Link
-              className={styles["row"]}
-              key={m?.id || b.id}
-              to={`/books/${b.slug}`}
-            >
-              <Media path={b.cover_path} alt="" className={styles["thumb"]} />
-              <div>
-                <strong>{b.title}</strong>
-                <p>{b.author}</p>
+          {items.map(({ b, m }) => {
+            const past = !!m && !isUpcomingMeeting(m, now);
+            const next = !!m && m.id === nextMeetingId;
+            const className = [
+              styles.row,
+              past ? styles.past : styles.available,
+              next ? styles.next : "",
+            ]
+              .filter(Boolean)
+              .join(" ");
+            const content = (
+              <>
+                <Media path={b.cover_path} alt="" className={styles["thumb"]} />
+                <div>
+                  {next && (
+                    <span className={styles.badge}>Следующая встреча</span>
+                  )}
+                  <strong>{b.title}</strong>
+                  <p>{b.author}</p>
+                </div>
+                <div className={styles["row-meta"]}>
+                  <span>
+                    {m?.is_past && !m.starts_at
+                      ? "Прошедшая встреча · дата не указана"
+                      : date(m?.starts_at || null)}
+                  </span>
+                  {m?.price != null && (
+                    <small>Стоимость: {formatPrice(m.price)}</small>
+                  )}
+                  {past && m?.starts_at && <small>Встреча прошла</small>}
+                </div>
+                {!past && <span aria-hidden="true">›</span>}
+              </>
+            );
+            return past ? (
+              <div className={className} key={m?.id || b.id}>
+                {content}
               </div>
-              <div className={styles["row-meta"]}>
-                <span>{date(m?.starts_at || null)}</span>
-                {m?.price != null && (
-                  <small>Стоимость: {formatPrice(m.price)}</small>
-                )}
-              </div>
-              <span aria-hidden="true">›</span>
-            </Link>
-          ))}
+            ) : (
+              <Link
+                className={className}
+                key={m?.id || b.id}
+                to={m ? `/meetings/${m.id}` : `/books/${b.slug}`}
+              >
+                {content}
+              </Link>
+            );
+          })}
         </div>
       ) : (
-        <p className={styles["notice"]}>Планы пока не добавлены.</p>
+        <p className={styles["notice"]}>
+          {showPast ? "Встреч пока нет." : "Предстоящих встреч пока нет."}
+        </p>
       )}
     </section>
   );

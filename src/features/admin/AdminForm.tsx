@@ -85,9 +85,13 @@ export function AdminForm({
       </>
       <>
         <h3>Встреча</h3>
-        {text("starts_at", "Дата и время", { type: "datetime-local" })}
+        {text("starts_at", form.date_only ? "Дата" : "Дата и время", {
+          type: form.date_only ? "date" : "datetime-local",
+        })}
+        {form.date_only &&
+          text("meeting_time", "Время (необязательно)", { type: "time" })}
         {text("place", "Место")}
-        {text("place_url", "Ссылка на место в 2ГИС (необязательно)", {
+        {text("place_url", "Ссылка на место (например, 2ГИС)", {
           type: "url",
         })}
         <label>

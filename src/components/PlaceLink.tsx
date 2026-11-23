@@ -1,11 +1,11 @@
-import { isTwoGisUrl } from "../lib/place";
+import { isPlaceUrl } from "../lib/place";
 import styles from "./PlaceLink.module.scss";
 
 type Props = { place?: string | null; url?: string | null };
 
 export function PlaceLink({ place, url }: Props) {
-  const label = place || (url ? "Открыть в 2ГИС" : "Место уточняется");
-  return url && isTwoGisUrl(url) ? (
+  const label = place || (url ? "Открыть место" : "Место уточняется");
+  return url && isPlaceUrl(url) ? (
     <a
       className={styles.link}
       href={url}

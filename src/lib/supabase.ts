@@ -48,7 +48,10 @@ export async function upload(file: File, folder: "covers") {
   return path;
 }
 export async function removeFiles(paths: (string | null | undefined)[]) {
-  const files = paths.filter((p): p is string => Boolean(p));
+  const files = paths.filter(
+    (p): p is string =>
+      Boolean(p) && !p!.startsWith("book-covers/") && !p!.startsWith("demo/"),
+  );
   if (files.length) {
     const { error } = await db.storage.from("club-media").remove(files);
     if (error) throw error;

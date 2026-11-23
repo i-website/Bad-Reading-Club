@@ -1,24 +1,32 @@
-import styles from "./BookPage.module.scss";
+﻿import styles from "./BookPage.module.scss";
 import { Link, useParams } from "react-router-dom";
-import type { ClubData as Data } from "../types";
+import type { ClubData } from "../types";
+import { demoMode } from "../lib/supabase";
+import { demoBookRanking } from "../lib/demo";
 import { Media } from "../components/Media";
-import { formatDate as date, formatPrice } from "../lib/format";
-import { PlaceLink } from "../components/PlaceLink";
-export function BookPage({ data }: { data: Data }) {
+import { formatVotes, isUpcomingMeeting } from "../lib/format";
+import { RatingValue } from "../features/ratings/RatingValue";
+
+export function BookPage({ data }: { data: ClubData }) {
   const { slug } = useParams();
-  const book = data.books.find((b) => b.slug === slug);
+  const book = data.books.find((item) => item.slug === slug);
   if (!book)
     return (
       <section>
         <p>Книга не найдена.</p>
-        <Link to="/plans">К планам</Link>
+        <Link to="/ratings">К рейтингу</Link>
       </section>
     );
-  const meetings = data.meetings.filter((m) => m.book_id === book.id);
+  const rating = demoMode
+    ? demoBookRanking.find((item) => item.bookId === book.id)
+    : undefined;
+  const meetings = data.meetings.filter(
+    (meeting) => meeting.book_id === book.id && isUpcomingMeeting(meeting),
+  );
   return (
     <section>
-      <Link className={styles["back"]} to="/plans">
-        ‹ &nbsp; К планам
+      <Link className={styles.back} to="/ratings">
+        ‹ &nbsp; К рейтингу
       </Link>
       <div className={styles["book-hero"]}>
         <Media
@@ -28,28 +36,28 @@ export function BookPage({ data }: { data: Data }) {
         />
         <div>
           <h1 className={styles["page-title"]}>{book.title}</h1>
-          <p className={styles["lead"]}>{book.author}</p>
-          <p className={styles["prose"]}>
+          <p className={styles.lead}>{book.author}</p>
+          {rating?.rating != null && (
+            <p className={styles.rating}>
+              <RatingValue value={rating.rating} />
+              {rating.votes != null && ` · ${formatVotes(rating.votes)}`}
+            </p>
+          )}
+          {rating && rating.rating == null && <p>Не голосовали</p>}
+          <p className={styles.prose}>
             {book.description || "Описание книги пока не добавлено."}
           </p>
+          {meetings.map((meeting) => (
+            <p key={meeting.id}>
+              <Link
+                className={styles.meetingLink}
+                to={`/meetings/${meeting.id}`}
+              >
+                Подробнее о встрече
+              </Link>
+            </p>
+          ))}
         </div>
-        <aside>
-          <h3>Встреча</h3>
-          {meetings.length ? (
-            meetings.map((m) => (
-              <div key={m.id}>
-                <p>▦ &nbsp; {date(m.starts_at)}</p>
-                <p>
-                  ⌾ &nbsp; <PlaceLink place={m.place} url={m.place_url} />
-                </p>
-                {m.price != null && <p>Стоимость: {formatPrice(m.price)}</p>}
-                <p>{m.notes}</p>
-              </div>
-            ))
-          ) : (
-            <p>Дата и место уточняются.</p>
-          )}
-        </aside>
       </div>
     </section>
   );

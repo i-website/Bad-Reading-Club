@@ -3,7 +3,6 @@ import { useEffect, useState, type FormEvent } from "react";
 import {
   db,
   configured,
-  demoMode,
   message,
   upload,
   removeFiles,
@@ -11,7 +10,8 @@ import {
 import { type Book, type Meeting } from "../../types";
 import { AdminForm } from "./AdminForm";
 import { PublishDialog } from "./PublishDialog";
-import { isTwoGisUrl } from "../../lib/place";
+import { isPlaceUrl } from "../../lib/place";
+import { isDateOnly, isUpcomingMeeting } from "../../lib/format";
 type Row = Meeting;
 import type { Form } from "./types";
 const initial: Record<"meetings", Form> = {
@@ -22,6 +22,8 @@ const initial: Record<"meetings", Form> = {
     description: "",
     cover_path: "",
     starts_at: "",
+    date_only: false,
+    meeting_time: "",
     place: "",
     place_url: "",
     price: "",
@@ -33,6 +35,11 @@ function toForm(row: Row | Book, defaults: Form): Form {
   const result: Form = {};
   for (const [key, value] of Object.entries(row)) {
     if (!(key in defaults)) continue;
+    if (key === "starts_at" && typeof value === "string" && isDateOnly(value)) {
+      result.starts_at = value;
+      result.date_only = true;
+      continue;
+    }
     result[key] =
       typeof value === "boolean"
         ? value
@@ -138,8 +145,10 @@ export default function Admin() {
     let saved = false;
     try {
       const placeUrl = String(form.place_url || "").trim();
-      if (placeUrl && !isTwoGisUrl(placeUrl)) {
-        throw new Error("Укажите ссылку на 2ГИС, начинающуюся с https://.");
+      if (placeUrl && !isPlaceUrl(placeUrl)) {
+        throw new Error(
+          "Укажите корректную ссылку, начинающуюся с http:// или https://.",
+        );
       }
       if (file) newPath = await upload(file, "covers");
       const book = {
@@ -152,7 +161,11 @@ export default function Admin() {
       };
       const meeting = {
         starts_at: form.starts_at
-          ? new Date(String(form.starts_at)).toISOString()
+          ? form.date_only
+            ? form.meeting_time
+              ? new Date(`${form.starts_at}T${form.meeting_time}`).toISOString()
+              : String(form.starts_at)
+            : new Date(String(form.starts_at)).toISOString()
           : null,
         place: form.place || null,
         place_url: placeUrl || null,
@@ -258,12 +271,6 @@ export default function Admin() {
       <section className={styles["login"]}>
         <h1 className={styles["page-title"]}>Вход для организатора</h1>
         <p>Управление книгами и встречами клуба.</p>
-        {demoMode && (
-          <p className={styles["notice"]}>
-            Деморежим: для входа укажите любой email и пароль. Изменения
-            сохраняются только в этом браузере.
-          </p>
-        )}
         <form onSubmit={login}>
           <label>
             Email
@@ -300,9 +307,15 @@ export default function Admin() {
         <button onClick={() => void db.auth.signOut()}>Выйти</button>
       </section>
     );
-  const drafts = meetings.filter((meeting) => !meeting.published);
-  const published = meetings.filter((meeting) => meeting.published);
-  function meetingList(rows: Row[], isDraft: boolean) {
+  const now = Date.now();
+  const past = meetings.filter((meeting) => !isUpcomingMeeting(meeting, now));
+  const drafts = meetings.filter(
+    (meeting) => !meeting.published && isUpcomingMeeting(meeting, now),
+  );
+  const published = meetings.filter(
+    (meeting) => meeting.published && isUpcomingMeeting(meeting, now),
+  );
+  function meetingList(rows: Row[]) {
     if (!rows.length) return <p>Встреч пока нет.</p>;
     return (
       <div className={styles["admin-list"]}>
@@ -326,10 +339,10 @@ export default function Admin() {
                     ?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
             >
-              {`${books.find((book) => book.id === row.book_id)?.title || "Книга"} · ${row.starts_at ? new Date(row.starts_at).toLocaleDateString("ru-RU") : "дата уточняется"}`}
+              {`${books.find((book) => book.id === row.book_id)?.title || "Книга"} · ${row.starts_at ? new Date(row.starts_at).toLocaleDateString("ru-RU") : row.is_past ? "дата не указана" : "дата уточняется"}`}
             </button>
             <div className={styles["row-actions"]}>
-              {isDraft && (
+              {!row.published && (
                 <button
                   className={styles["text-button"]}
                   disabled={busy}
@@ -385,11 +398,15 @@ export default function Admin() {
         <div className={styles["meetings"]}>
           <section className={styles["group"]} aria-labelledby="drafts-title">
             <h3 id="drafts-title">Неопубликованные ({drafts.length})</h3>
-            {meetingList(drafts, true)}
+            {meetingList(drafts)}
           </section>
           <details className={styles["group"]}>
             <summary>Опубликованные ({published.length})</summary>
-            {meetingList(published, false)}
+            {meetingList(published)}
+          </details>
+          <details className={styles["group"]}>
+            <summary>Прошедшие ({past.length})</summary>
+            {meetingList(past)}
           </details>
         </div>
         <div id="meeting-form" className={styles["form"]}>

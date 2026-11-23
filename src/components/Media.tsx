@@ -14,7 +14,9 @@ export function Media({
   useEffect(() => {
     let active = true;
     setUrl("");
-    if (path)
+    if (path && /^book-covers\/[a-z0-9-]+\.jpg$/.test(path)) {
+      setUrl(`${import.meta.env.BASE_URL}${path}`);
+    } else if (path)
       void db.storage
         .from("club-media")
         .createSignedUrl(path, 3600)
