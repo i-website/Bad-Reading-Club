@@ -1,8 +1,11 @@
 @import "tailwindcss" layer(tailwind);
 :root {
+  --club-green: #25845f;
+  --club-green-dark: #17694b;
+  --club-green-text: #1b513b;
   font-family: Arial, sans-serif;
   color: #17211b;
-  background: #f6f3ec;
+  background: #f4f0ea;
   font-synthesis: none;
 }
 * {
@@ -23,8 +26,8 @@ textarea {
 }
 button {
   cursor: pointer;
-  border: 1px solid #1d4733;
-  background: #1d4733;
+  border: 1px solid var(--club-green-dark);
+  background: var(--club-green-dark);
   color: #fff;
   border-radius: 7px;
   padding: 13px 21px;
@@ -90,7 +93,7 @@ h3 {
   font-weight: 400;
 }
 h1 {
-  color: #1d4733;
+  color: var(--club-green-dark);
 }
 h2 {
   font-size: 2.2rem;

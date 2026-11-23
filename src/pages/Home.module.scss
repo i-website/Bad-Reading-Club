@@ -1,7 +1,7 @@
 .button {
   cursor: pointer;
-  border: 1px solid #1d4733;
-  background: #1d4733;
+  border: 1px solid var(--club-green-dark);
+  background: var(--club-green-dark);
   color: #fff;
   border-radius: 7px;
   padding: 13px 21px;
@@ -11,7 +11,7 @@
 }
 .outline {
   background: transparent;
-  color: #1b3e2c;
+  color: var(--club-green-text);
 }
 .button:hover {
   filter: brightness(0.94);
@@ -20,7 +20,7 @@
   text-transform: uppercase;
   letter-spacing: 0.16em;
   font-size: 0.8rem;
-  color: #30553e;
+  color: var(--club-green-text);
   margin-bottom: 18px;
 }
 .hero {
@@ -71,7 +71,7 @@
 .tag {
   display: inline-block;
   background: #e1e5dc;
-  color: #1d3e2d;
+  color: var(--club-green-text);
   border-radius: 5px;
   padding: 6px 10px;
   font-size: 0.8rem;
@@ -80,7 +80,7 @@
   margin: 22px 0;
 }
 .details span {
-  color: #1d4733;
+  color: var(--club-green-dark);
   display: inline-block;
   width: 28px;
 }
@@ -91,7 +91,7 @@
 }
 .about h2 {
   font-size: clamp(2rem, 4vw, 3.5rem);
-  color: #1d4733;
+  color: var(--club-green-dark);
 }
 .about p:last-child {
   max-width: 600px;

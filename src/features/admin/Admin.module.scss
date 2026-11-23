@@ -1,15 +1,15 @@
 .outline {
   background: transparent;
-  color: #1b3e2c;
+  color: var(--club-green-text);
 }
 nav a.active {
-  border-color: #1d4733;
+  border-color: var(--club-green-dark);
 }
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.16em;
   font-size: 0.8rem;
-  color: #30553e;
+  color: var(--club-green-text);
   margin-bottom: 18px;
 }
 .page-title {
@@ -51,11 +51,11 @@ nav a.active {
 }
 .tabs button {
   background: transparent;
-  color: #1d4733;
+  color: var(--club-green-dark);
   border-color: transparent;
 }
 .tabs button.active {
-  background: #1d4733;
+  background: var(--club-green-dark);
   color: white;
 }
 .admin-grid {
@@ -82,7 +82,7 @@ nav a.active {
   padding: 0;
   background: none;
   border: 0;
-  color: #1d4733;
+  color: var(--club-green-dark);
   text-align: left;
   text-decoration: underline;
 }

@@ -23,7 +23,17 @@ export function Layout({
       )}
       <header>
         <Link to="/" className={styles["brand"]}>
-          <span className={styles["mark"]}>✳</span>
+          <svg
+            className={styles["mark"]}
+            viewBox="0 0 220 140"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              fill="currentColor"
+              d="M0 110h220v29H0z M0 45l91 48-8 19L0 77z M46 0h33l31 64L142 0h33l-50 110H95z M220 45v32l-83 35-8-19z"
+            />
+          </svg>
           {settings?.name || "BAD READING CLUB"}
         </Link>
         <nav aria-label="Главная навигация">
