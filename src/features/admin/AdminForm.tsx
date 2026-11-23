@@ -2,10 +2,9 @@ import styles from "./AdminForm.module.scss";
 import type { ChangeEvent, FormEvent } from "react";
 import { Media } from "../../components/Media";
 import type { Photo } from "../../types";
-import type { Tab, Form } from "./types";
+import type { Form } from "./types";
 
 type Props = {
-  tab: Tab;
   id: string;
   form: Form;
   photos: Photo[];
@@ -17,7 +16,6 @@ type Props = {
   deletePhoto: (photo: Photo) => void;
 };
 export function AdminForm({
-  tab,
   id,
   form,
   photos,
@@ -63,111 +61,88 @@ export function AdminForm({
 
   return (
     <form className={styles["editor"]} onSubmit={save}>
-      <h2>
-        {tab === "settings"
-          ? "Настройки"
-          : id
-            ? "Редактирование"
-            : "Новая запись"}
-      </h2>
-      {tab === "meetings" && (
-        <>
-          <h3>Книга</h3>
-          {text("title", "Название", { required: true })}
-          {text("author", "Автор", { required: true })}
-          {text("description", "Описание", { textarea: true })}
-          <label>
-            Обложка{" "}
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-            />
-          </label>
-          {!!form.cover_path && (
-            <Media
-              path={String(form.cover_path)}
-              alt="Текущая обложка"
-              className={styles["thumb"]}
-            />
-          )}
-        </>
-      )}
-      {tab === "meetings" && (
-        <>
-          <h3>Встреча</h3>
-          {text("starts_at", "Дата и время", { type: "datetime-local" })}
-          {text("place", "Место")}
-          <label>
-            Стоимость, ₽ (необязательно)
-            <input
-              type="number"
-              min="0"
-              max="99999999.99"
-              step="0.01"
-              value={String(form.price ?? "")}
-              onChange={(event) => change("price", event.target.value)}
-            />
-          </label>
-          {text("notes", "Примечания", { textarea: true })}
-          {id && (
-            <div>
-              <label>
-                Добавить фотографию
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={(e) => void addPhoto(e)}
-                  disabled={busy}
-                />
-              </label>
-              <div className={styles["photo-admin"]}>
-                {photos
-                  .filter((p) => p.meeting_id === id)
-                  .map((p) => (
-                    <div key={p.id}>
-                      <Media
-                        path={p.storage_path}
-                        alt="Фото встречи"
-                        className={styles["thumb"]}
-                      />
-                      <button
-                        type="button"
-                        className={[
-                          styles["text-button"],
-                          styles["danger"],
-                        ].join(" ")}
-                        onClick={() => void deletePhoto(p)}
-                      >
-                        Удалить фото
-                      </button>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
-        </>
-      )}
-      {tab === "settings" && (
-        <>
-          {text("name", "Название", { required: true })}
-          {text("description", "Описание", { textarea: true })}
-          {text("links", "Публичные ссылки", {
-            textarea: true,
-            hint: "По одной в строке: название | https://адрес",
-          })}
-        </>
-      )}
-      {tab !== "settings" && (
-        <label className={styles["check"]}>
+      <h2>{id ? "Редактирование" : "Новая встреча"}</h2>
+      <>
+        <h3>Книга</h3>
+        {text("title", "Название", { required: true })}
+        {text("author", "Автор", { required: true })}
+        {text("description", "Описание", { textarea: true })}
+        <label>
+          Обложка{" "}
           <input
-            type="checkbox"
-            checked={!!form.published}
-            onChange={(e) => change("published", e.target.checked)}
-          />{" "}
-          Опубликовать
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+          />
         </label>
-      )}
+        {!!form.cover_path && (
+          <Media
+            path={String(form.cover_path)}
+            alt="Текущая обложка"
+            className={styles["thumb"]}
+          />
+        )}
+      </>
+      <>
+        <h3>Встреча</h3>
+        {text("starts_at", "Дата и время", { type: "datetime-local" })}
+        {text("place", "Место")}
+        <label>
+          Стоимость, ₽ (необязательно)
+          <input
+            type="number"
+            min="0"
+            max="99999999.99"
+            step="0.01"
+            value={String(form.price ?? "")}
+            onChange={(event) => change("price", event.target.value)}
+          />
+        </label>
+        {text("notes", "Примечания", { textarea: true })}
+        {id && (
+          <div>
+            <label>
+              Добавить фотографию
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(e) => void addPhoto(e)}
+                disabled={busy}
+              />
+            </label>
+            <div className={styles["photo-admin"]}>
+              {photos
+                .filter((p) => p.meeting_id === id)
+                .map((p) => (
+                  <div key={p.id}>
+                    <Media
+                      path={p.storage_path}
+                      alt="Фото встречи"
+                      className={styles["thumb"]}
+                    />
+                    <button
+                      type="button"
+                      className={[styles["text-button"], styles["danger"]].join(
+                        " ",
+                      )}
+                      onClick={() => void deletePhoto(p)}
+                    >
+                      Удалить фото
+                    </button>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+      </>
+      <label className={styles["check"]}>
+        <input
+          type="checkbox"
+          checked={!!form.published}
+          onChange={(e) => change("published", e.target.checked)}
+        />
+        Опубликовать
+      </label>
       <button disabled={busy}>{busy ? "Сохраняем…" : "Сохранить"}</button>
     </form>
   );

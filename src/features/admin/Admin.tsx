@@ -8,20 +8,11 @@ import {
   upload,
   removeFiles,
 } from "../../lib/supabase";
-import {
-  type Book,
-  type Meeting,
-  type Photo,
-  type Settings,
-} from "../../types";
+import { type Book, type Meeting, type Photo } from "../../types";
 import { AdminForm } from "./AdminForm";
 type Row = Meeting;
-import type { Tab, Form } from "./types";
-const titles: Record<Tab, string> = {
-  meetings: "Встречи",
-  settings: "Настройки клуба",
-};
-const initial: Record<Exclude<Tab, "settings">, Form> = {
+import type { Form } from "./types";
+const initial: Record<"meetings", Form> = {
   meetings: {
     slug: "",
     title: "",
@@ -61,11 +52,9 @@ export default function Admin() {
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [tab, setTab] = useState<Tab>("meetings");
   const [books, setBooks] = useState<Book[]>([]);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [photos, setPhotos] = useState<Photo[]>([]);
-  const [settings, setSettings] = useState<Settings | null>(null);
   const [form, setForm] = useState<Form>(initial.meetings);
   const [id, setId] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -77,13 +66,11 @@ export default function Admin() {
       db.from("books").select("*").order("created_at"),
       db.from("meetings").select("*").order("starts_at"),
       db.from("meeting_photos").select("*").order("sort_order"),
-      db.from("club_settings").select("*").maybeSingle(),
     ]);
     for (const r of result) if (r.error) throw r.error;
     setBooks(result[0].data as Book[]);
     setMeetings(result[1].data as Meeting[]);
     setPhotos(result[2].data as Photo[]);
-    setSettings(result[3].data as Settings | null);
   }
   useEffect(() => {
     let alive = true;
@@ -122,23 +109,12 @@ export default function Admin() {
       subscription.unsubscribe();
     };
   }, []);
-  function selectTab(t: Tab) {
-    setTab(t);
+  function newMeeting() {
     setId("");
     setFile(null);
     setError("");
     setSuccess("");
-    setForm(
-      t === "settings"
-        ? {
-            name: settings?.name || "",
-            description: settings?.description || "",
-            links: (settings?.links || [])
-              .map((x) => `${x.label} | ${x.url}`)
-              .join("\n"),
-          }
-        : initial[t],
-    );
+    setForm(initial.meetings);
   }
   function change(key: string, value: string | boolean) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -159,64 +135,40 @@ export default function Admin() {
     let newPath = "";
     let saved = false;
     try {
-      if (tab === "settings") {
-        const links = String(form.links)
-          .split("\n")
-          .map((s) => s.trim())
-          .filter(Boolean)
-          .map((line) => {
-            const [label, ...parts] = line.split("|");
-            const url = parts.join("|").trim();
-            if (!label.trim() || !/^https?:\/\//i.test(url))
-              throw new Error("Каждая ссылка: название | https://адрес");
-            return { label: label.trim(), url };
-          });
-        const { error } = await db.from("club_settings").upsert({
-          id: 1,
-          name: form.name,
-          description: form.description,
-          links,
-        });
-        if (error) throw error;
-        saved = true;
-      } else {
-        if (file) newPath = await upload(file, "covers");
-        const book = {
-          slug: form.slug || `book-${crypto.randomUUID()}`,
-          title: form.title,
-          author: form.author,
-          description: form.description,
-          cover_path: newPath || form.cover_path || null,
-          published: !!form.published,
-        };
-        const meeting = {
-          starts_at: form.starts_at
-            ? new Date(String(form.starts_at)).toISOString()
-            : null,
-          place: form.place || null,
-          price: form.price === "" ? null : Number(form.price),
-          notes: form.notes,
-          published: !!form.published,
-        };
-        const { error } = await db.rpc("save_meeting_with_book", {
-          p_meeting_id: id || null,
-          p_book: book,
-          p_meeting: meeting,
-        });
-        if (error) throw error;
-        saved = true;
-        if (newPath && form.cover_path)
-          await removeFiles([String(form.cover_path)]);
-      }
+      if (file) newPath = await upload(file, "covers");
+      const book = {
+        slug: form.slug || `book-${crypto.randomUUID()}`,
+        title: form.title,
+        author: form.author,
+        description: form.description,
+        cover_path: newPath || form.cover_path || null,
+        published: !!form.published,
+      };
+      const meeting = {
+        starts_at: form.starts_at
+          ? new Date(String(form.starts_at)).toISOString()
+          : null,
+        place: form.place || null,
+        price: form.price === "" ? null : Number(form.price),
+        notes: form.notes,
+        published: !!form.published,
+      };
+      const { error } = await db.rpc("save_meeting_with_book", {
+        p_meeting_id: id || null,
+        p_book: book,
+        p_meeting: meeting,
+      });
+      if (error) throw error;
+      saved = true;
+      if (newPath && form.cover_path)
+        await removeFiles([String(form.cover_path)]);
       await load();
       setFile(null);
       setSuccess(
         "Сохранено. Изменения появятся на сайте после обновления страницы.",
       );
-      if (tab !== "settings") {
-        setId("");
-        setForm(initial[tab]);
-      }
+      setId("");
+      setForm(initial.meetings);
     } catch (e) {
       if (newPath && !saved)
         try {
@@ -253,7 +205,7 @@ export default function Admin() {
       await removeFiles(paths);
       await load();
       setId("");
-      if (tab !== "settings") setForm(initial[tab]);
+      setForm(initial.meetings);
       setSuccess("Запись удалена.");
     } catch (e) {
       setError(message(e));
@@ -359,7 +311,7 @@ export default function Admin() {
         <button onClick={() => void db.auth.signOut()}>Выйти</button>
       </section>
     );
-  const rows: Row[] = tab === "meetings" ? meetings : [];
+  const rows: Row[] = meetings;
   return (
     <section className={styles["admin"]}>
       <div className={styles["admin-header"]}>
@@ -373,17 +325,6 @@ export default function Admin() {
         >
           Выйти
         </button>
-      </div>
-      <div className={styles["tabs"]}>
-        {(Object.keys(titles) as Tab[]).map((t) => (
-          <button
-            className={t === tab ? styles.active : ""}
-            key={t}
-            onClick={() => selectTab(t)}
-          >
-            {titles[t]}
-          </button>
-        ))}
       </div>
       {error && (
         <p
@@ -400,53 +341,47 @@ export default function Admin() {
       )}
       <div className={styles["admin-grid"]}>
         <div>
-          {tab !== "settings" && (
-            <>
-              <h2>{titles[tab]}</h2>
-              <button
-                className={styles["outline"]}
-                onClick={() => selectTab(tab)}
-              >
-                Добавить
-              </button>
-              <div className={styles["admin-list"]}>
-                {rows.map((row) => (
-                  <div key={row.id}>
-                    <button
-                      className={styles["text-button"]}
-                      onClick={() => {
-                        setId(row.id);
-                        const book = books.find(
-                          (item) => item.id === row.book_id,
-                        );
-                        setForm({
-                          ...initial.meetings,
-                          ...(book ? toForm(book, initial.meetings) : {}),
-                          ...toForm(row, initial.meetings),
-                        });
-                        setFile(null);
-                        setSuccess("");
-                      }}
-                    >
-                      {`${books.find((b) => b.id === row.book_id)?.title || "Книга"} · ${row.starts_at ? new Date(row.starts_at).toLocaleDateString("ru-RU") : "дата уточняется"}`}
-                    </button>
-                    <button
-                      className={[styles["text-button"], styles["danger"]].join(
-                        " ",
-                      )}
-                      disabled={busy}
-                      onClick={() => void remove(row)}
-                    >
-                      Удалить
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
+          <>
+            <h2>Встречи</h2>
+            <button className={styles["outline"]} onClick={newMeeting}>
+              Добавить
+            </button>
+            <div className={styles["admin-list"]}>
+              {rows.map((row) => (
+                <div key={row.id}>
+                  <button
+                    className={styles["text-button"]}
+                    onClick={() => {
+                      setId(row.id);
+                      const book = books.find(
+                        (item) => item.id === row.book_id,
+                      );
+                      setForm({
+                        ...initial.meetings,
+                        ...(book ? toForm(book, initial.meetings) : {}),
+                        ...toForm(row, initial.meetings),
+                      });
+                      setFile(null);
+                      setSuccess("");
+                    }}
+                  >
+                    {`${books.find((b) => b.id === row.book_id)?.title || "Книга"} · ${row.starts_at ? new Date(row.starts_at).toLocaleDateString("ru-RU") : "дата уточняется"}`}
+                  </button>
+                  <button
+                    className={[styles["text-button"], styles["danger"]].join(
+                      " ",
+                    )}
+                    disabled={busy}
+                    onClick={() => void remove(row)}
+                  >
+                    Удалить
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
         </div>
         <AdminForm
-          tab={tab}
           id={id}
           form={form}
           photos={photos}
