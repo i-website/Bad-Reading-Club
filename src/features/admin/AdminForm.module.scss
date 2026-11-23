@@ -1,0 +1,42 @@
+.thumb {
+  width: 55px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 4px;
+  font-size: 0.5rem;
+}
+.editor {
+  display: grid;
+  gap: 17px;
+}
+.editor {
+  padding: 28px;
+  border: 1px solid #dadbd2;
+  border-radius: 12px;
+  align-content: start;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.check input {
+  width: auto;
+}
+.text-button {
+  padding: 0;
+  background: none;
+  border: 0;
+  color: #1d4733;
+  text-align: left;
+  text-decoration: underline;
+}
+.danger {
+  color: #a33e35;
+}
+.photo-admin > div {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin: 10px 0;
+}
