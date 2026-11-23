@@ -15,7 +15,7 @@ export function Home({ data }: { data: Data }) {
   return (
     <>
       <section className={styles["hero"]}>
-        <div>
+        <div className={styles["intro"]}>
           <p className={styles["eyebrow"]}>Книжный клуб</p>
           <h1>
             BAD
