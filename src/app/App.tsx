@@ -9,6 +9,7 @@ import { Plans } from "../pages/Plans";
 import { BookPage } from "../pages/BookPage";
 import { MeetingPage } from "../pages/MeetingPage";
 import { RatingsPage } from "../pages/RatingsPage";
+import { Account } from "../pages/Account";
 const Admin = lazy(() => import("../features/admin/Admin"));
 const blank: Data = {
   books: [],
@@ -60,6 +61,7 @@ export default function App() {
   return (
     <Layout settings={data.settings}>
       <Routes>
+        <Route path="/account" element={<Account />} />
         <Route
           path="/admin/*"
           element={

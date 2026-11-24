@@ -112,6 +112,15 @@ export function Layout({
             hidden={!menuOpen}
           >
             <NavLink
+              to="/account"
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) =>
+                isActive ? styles.active : undefined
+              }
+            >
+              Мой аккаунт
+            </NavLink>
+            <NavLink
               to="/"
               end
               onClick={() => setMenuOpen(false)}

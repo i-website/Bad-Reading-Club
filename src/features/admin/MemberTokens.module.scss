@@ -1,0 +1,14 @@
+﻿.tokens {
+  max-width: 500px;
+  margin: 32px 0;
+}
+.tokens form {
+  display: grid;
+  gap: 17px;
+  margin: 20px 0;
+}
+.token {
+  display: block;
+  overflow-wrap: anywhere;
+  user-select: all;
+}

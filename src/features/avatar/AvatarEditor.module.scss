@@ -1,0 +1,91 @@
+.editor {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}
+.editor > .preview {
+  flex: none;
+  width: min(100%, 190px, 23vh);
+  width: min(100%, 190px, 23dvh);
+}
+.preview {
+  position: relative;
+  width: min(100%, 220px);
+  aspect-ratio: 1;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: #facdda;
+  overflow: hidden;
+}
+.layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+}
+.controls {
+  flex: 1;
+  padding: 8px 4px 8px 2px;
+}
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  flex: none;
+  gap: 8px;
+  padding: 4px 2px 12px;
+}
+.category,
+.activeCategory {
+  flex: none;
+  border-radius: 20px;
+  padding: 8px 13px;
+  font-size: 0.85rem;
+}
+.category {
+  background: transparent;
+  color: var(--club-green-text);
+  border-color: #c9d2c8;
+}
+.options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 10px;
+}
+.option,
+.activeOption {
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid #deded5;
+  border-radius: 12px;
+  background: #fff9f4;
+  color: var(--club-green-text);
+}
+.activeOption {
+  border: 2px solid var(--club-green-dark);
+  padding: 7px;
+}
+.option .preview,
+.activeOption .preview {
+  width: 100%;
+  margin: 0 auto;
+}
+.colors {
+  display: grid;
+  gap: 14px;
+  max-width: 300px;
+}
+.partColor {
+  margin-top: 16px;
+  max-width: 300px;
+}
+.colors input[type="color"],
+.partColor input[type="color"] {
+  height: 44px;
+  padding: 4px;
+}

@@ -1,0 +1,113 @@
+<?php
+declare(strict_types=1);
+
+// Run with: php -S 127.0.0.1:8000 -t backend/public
+header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store');
+header('X-Content-Type-Options: nosniff');
+ini_set('session.use_strict_mode', '1');
+ini_set('session.use_only_cookies', '1');
+session_set_cookie_params(['httponly' => true, 'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'samesite' => 'Lax', 'path' => '/']);
+session_start();
+function respond(int $status, array $data): never {
+    http_response_code($status);
+    echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+    exit;
+}
+function memberData(array $member): array {
+    $member['avatar'] = isset($member['avatar']) ? json_decode($member['avatar'], true) : null;
+    return $member;
+}
+try {
+    $config = require dirname(__DIR__) . '/config.php';
+    $dsn = sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4', $config['host'], $config['port'], $config['database']);
+    $db = new PDO($dsn, $config['username'], $config['password'], [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_EMULATE_PREPARES => false,
+    ]);
+    $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
+    $action = $_GET['action'] ?? 'session';
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'session') {
+        $user = null;
+        if (isset($_SESSION['member_id'])) {
+            $query = $db->prepare('SELECT id, name, avatar FROM members WHERE id = ?');
+            $query->execute([$_SESSION['member_id']]);
+            $row = $query->fetch(PDO::FETCH_ASSOC);
+            $user = $row ? memberData($row) : null;
+        }
+        respond(200, ['user' => $user, 'csrf' => $_SESSION['csrf']]);
+    }
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') respond(405, ['error' => 'Метод не поддерживается.']);
+    if (!hash_equals($_SESSION['csrf'], $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '')) respond(403, ['error' => 'Сессия устарела. Обновите страницу.']);
+    if ($action === 'logout') {
+        $_SESSION = [];
+        session_regenerate_id(true);
+        respond(200, ['ok' => true]);
+    }
+    if ($action === 'profile') {
+        if (!isset($_SESSION['member_id'])) respond(401, ['error' => 'Войдите в аккаунт.']);
+        $input = json_decode(file_get_contents('php://input'), true);
+        $name = trim(is_array($input) && is_string($input['name'] ?? null) ? $input['name'] : '');
+        if ($name === '' || strlen($name) > 160) respond(400, ['error' => 'Укажите имя длиной не более 160 байт.']);
+        $avatar = $input['avatar'] ?? null;
+        if (!is_array($avatar) || !in_array($avatar['style'] ?? null, ['girl', 'man'], true)) respond(400, ['error' => 'Проверьте настройки аватарки.']);
+        // Older clients and drafts do not yet contain individual accessory colors.
+        $avatar += [
+            'browColor' => $avatar['hair'] ?? '#5c2d0f',
+            'glassesColor' => '#181615',
+            'extraColor' => $avatar['hair'] ?? '#5c2d0f',
+            'mouthColor' => '#bb1639',
+        ];
+        $limits = ['face' => 3, 'eyes' => $avatar['style'] === 'girl' ? 4 : 5, 'nose' => $avatar['style'] === 'girl' ? 4 : 5, 'mouth' => $avatar['style'] === 'girl' ? 5 : 4, 'brows' => 4, 'backHair' => 9, 'frontHair' => 9, 'clothes' => $avatar['style'] === 'girl' ? 6 : 3, 'glasses' => 4, 'extra' => $avatar['style'] === 'girl' ? 4 : 5];
+        foreach ($limits as $part => $max) {
+            $value = $avatar[$part] ?? null;
+            if (!is_int($value) || $value < (in_array($part, ['glasses', 'extra'], true) ? 0 : 1) || $value > $max) respond(400, ['error' => 'Проверьте настройки аватарки.']);
+        }
+        foreach (['skin', 'hair', 'outfit', 'browColor', 'glassesColor', 'extraColor', 'mouthColor'] as $color) {
+            if (!is_string($avatar[$color] ?? null) || !preg_match('/^#[0-9a-fA-F]{6}$/D', $avatar[$color])) respond(400, ['error' => 'Проверьте цвета аватарки.']);
+        }
+        $query = $db->prepare('UPDATE members SET name = ?, avatar = ? WHERE id = ?');
+        $query->execute([$name, json_encode($avatar), $_SESSION['member_id']]);
+        $query = $db->prepare('SELECT id, name, avatar FROM members WHERE id = ?');
+        $query->execute([$_SESSION['member_id']]);
+        $member = $query->fetch(PDO::FETCH_ASSOC);
+        if (!$member) respond(401, ['error' => 'Аккаунт не найден.']);
+        respond(200, ['user' => memberData($member), 'csrf' => $_SESSION['csrf']]);
+    }
+    if (!in_array($action, ['login', 'issue'], true)) respond(404, ['error' => 'Действие не найдено.']);
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $now = time();
+    $db->beginTransaction();
+    $db->prepare('DELETE FROM auth_attempts WHERE attempted_at < ?')->execute([$now - 900]);
+    $query = $db->prepare('SELECT COUNT(*) FROM auth_attempts WHERE ip = ?');
+    $query->execute([$ip]);
+    if ((int) $query->fetchColumn() >= 20) { $db->commit(); respond(429, ['error' => 'Слишком много попыток. Попробуйте через 15 минут.']); }
+    $db->prepare('INSERT INTO auth_attempts (ip, attempted_at) VALUES (?, ?)')->execute([$ip, $now]);
+    $db->commit();
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (!is_array($input)) respond(400, ['error' => 'Некорректный запрос.']);
+    if ($action === 'issue') {
+        $key = is_string($input['adminKey'] ?? null) ? $input['adminKey'] : '';
+        $adminHash = $config['admin_key_hash'] ?? '';
+        if (!is_string($adminHash) || strlen($adminHash) !== 64 || !hash_equals($adminHash, hash('sha256', $key))) respond(403, ['error' => 'Неверный ключ администратора.']);
+        $name = trim(is_string($input['name'] ?? null) ? $input['name'] : '');
+        if ($name === '' || strlen($name) > 160) respond(400, ['error' => 'Укажите имя участника.']);
+        $token = bin2hex(random_bytes(32));
+        $query = $db->prepare('INSERT INTO members (name, token_hash) VALUES (?, ?)');
+        $query->execute([$name, hash('sha256', $token)]);
+        respond(200, ['token' => $token]);
+    }
+    $token = trim(is_string($input['token'] ?? null) ? $input['token'] : '');
+    if (!preg_match('/^[a-f0-9]{64}$/D', $token)) respond(401, ['error' => 'Неверный токен.']);
+    $query = $db->prepare('SELECT id, name, avatar FROM members WHERE token_hash = ?');
+    $query->execute([hash('sha256', $token)]);
+    $member = $query->fetch(PDO::FETCH_ASSOC);
+    if (!$member) respond(401, ['error' => 'Неверный токен.']);
+    session_regenerate_id(true);
+    $_SESSION['member_id'] = (int) $member['id'];
+    $_SESSION['csrf'] = bin2hex(random_bytes(32));
+    respond(200, ['user' => memberData($member), 'csrf' => $_SESSION['csrf']]);
+} catch (Throwable $e) {
+    error_log((string) $e);
+    respond(500, ['error' => 'Ошибка сервера. Попробуйте позже.']);
+}

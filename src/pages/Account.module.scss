@@ -1,0 +1,147 @@
+.account {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.form {
+  display: grid;
+  gap: 17px;
+  margin: 24px 0;
+}
+.profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 30px 0 40px;
+}
+.avatar {
+  position: relative;
+  width: 154px;
+  margin-bottom: 18px;
+}
+.avatar > div {
+  margin-bottom: 0;
+}
+.avatarButton {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 2px solid var(--club-background);
+  border-radius: 50%;
+  background: var(--club-green-dark);
+  color: #fff;
+}
+.breadcrumb {
+  margin: 0;
+  color: var(--club-green-dark);
+  font-size: 0.88rem;
+}
+.name {
+  font-size: 1.8rem;
+  line-height: 1.2;
+  margin-bottom: 8px;
+  overflow-wrap: anywhere;
+}
+.member {
+  color: #687b70;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+.editName,
+.logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  background: transparent;
+  color: var(--club-green-text);
+}
+.editName {
+  padding: 12px 16px;
+}
+.editName svg,
+.logout svg {
+  color: var(--club-green-dark);
+}
+.secondary {
+  background: transparent;
+  color: var(--club-green-text);
+}
+.reviews {
+  padding: 28px 0;
+  border-top: 1px solid #deded5;
+  border-bottom: 1px solid #deded5;
+  margin-bottom: 28px;
+}
+.reviews h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+}
+.reviews h2 svg {
+  flex: none;
+  color: var(--club-green-dark);
+}
+.reviews p {
+  color: #687b70;
+  margin: 0 0 0 31px;
+  font-size: 0.9rem;
+}
+.error {
+  color: #b42318;
+}
+.editScreen {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  width: 100%;
+  min-height: calc(100vh - 90px);
+  color: var(--club-green-text);
+}
+.editScreen .form,
+.nameDialog .form {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  width: min(100%, 620px);
+  margin: 0 auto;
+}
+.editScreen h2 {
+  flex: none;
+  width: min(100%, 620px);
+  margin: 0 auto 16px;
+  font-size: 1.8rem;
+}
+.nameDialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  border: 1px solid #d9d7ce;
+  border-radius: 14px;
+  padding: 28px;
+  width: min(90vw, 480px);
+  background: #f4f0ea;
+  color: var(--club-green-text);
+}
+.nameDialog::backdrop {
+  background: rgb(0 0 0 / 48%);
+}
+.nameDialog h2 {
+  font-size: 1.8rem;
+  margin-bottom: 16px;
+}
+.actions {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}
