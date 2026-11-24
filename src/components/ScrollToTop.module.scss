@@ -1,0 +1,16 @@
+.button {
+  position: fixed;
+  z-index: 15;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid #c9d7cb;
+  border-radius: 50%;
+  background: var(--club-background);
+  color: var(--club-green-dark);
+  box-shadow: 0 3px 12px rgb(0 0 0 / 12%);
+}

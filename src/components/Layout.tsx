@@ -10,38 +10,8 @@ export function Layout({
   settings: Settings | null;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [headerHidden, setHeaderHidden] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (menuOpen) {
-      setHeaderHidden(false);
-      return;
-    }
-    let lastPosition = Math.max(0, window.scrollY);
-    let frame = 0;
-    function onScroll() {
-      if (frame) return;
-      frame = window.requestAnimationFrame(() => {
-        frame = 0;
-        const position = Math.max(0, window.scrollY);
-        const distance = position - lastPosition;
-        if (position <= 20) {
-          setHeaderHidden(false);
-          lastPosition = position;
-        } else if (Math.abs(distance) >= 8) {
-          setHeaderHidden(distance > 0 && position > 90);
-          lastPosition = position;
-        }
-      });
-    }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (frame) window.cancelAnimationFrame(frame);
-    };
-  }, [menuOpen]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -64,12 +34,7 @@ export function Layout({
 
   return (
     <>
-      <header
-        className={[styles.header, headerHidden ? styles.hidden : ""]
-          .filter(Boolean)
-          .join(" ")}
-        onFocusCapture={() => setHeaderHidden(false)}
-      >
+      <header className={styles.header}>
         <Link
           to="/"
           className={styles["brand"]}
