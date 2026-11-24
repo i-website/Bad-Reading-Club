@@ -75,17 +75,59 @@
   width: 100%;
   margin: 0 auto;
 }
-.colors {
-  display: grid;
-  gap: 14px;
-  max-width: 300px;
-}
 .partColor {
-  margin-top: 16px;
-  max-width: 300px;
+  margin-bottom: 18px;
 }
-.colors input[type="color"],
-.partColor input[type="color"] {
-  height: 44px;
-  padding: 4px;
+.colorTitle {
+  display: block;
+  color: #687b70;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.swatch,
+.palette {
+  position: relative;
+  display: block;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 2px solid var(--club-background);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px #c9d2c8;
+  cursor: pointer;
+}
+.swatch[aria-pressed="true"],
+.palette[data-active="true"] {
+  box-shadow: 0 0 0 2px var(--club-green-dark);
+}
+.palette {
+  overflow: hidden;
+  background: conic-gradient(#f55, #fc5, #5c8, #5ad, #a7c, #f55);
+}
+.palette:focus-within {
+  outline: 3px solid #8cab91;
+  outline-offset: 3px;
+}
+.palette input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.paletteText {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

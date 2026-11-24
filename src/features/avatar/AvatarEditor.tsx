@@ -65,7 +65,55 @@ type Part =
   | "clothes"
   | "glasses"
   | "extra";
-type Category = Part | "style" | "colors";
+type Category = Part | "style";
+type ColorKey =
+  | "skin"
+  | "hair"
+  | "outfit"
+  | "browColor"
+  | "glassesColor"
+  | "extraColor"
+  | "mouthColor";
+const skinColors = [
+  "#f9d4b4",
+  "#f6bd8e",
+  "#dfaa84",
+  "#bf8863",
+  "#966342",
+  "#674431",
+];
+const hairColors = [
+  "#181615",
+  "#5c2d0f",
+  "#a65b36",
+  "#e8c978",
+  "#eaeaea",
+  "#d888c2",
+];
+const accessoryColors = [
+  "#181615",
+  "#5c2d0f",
+  "#d4a744",
+  "#eaeaea",
+  "#d888c2",
+  "#7499d8",
+];
+const outfitColors = [
+  "#288b67",
+  "#ff6062",
+  "#facdda",
+  "#3e4eb2",
+  "#e5cf3c",
+  "#181615",
+];
+const mouthColors = [
+  "#bb1639",
+  "#df6d78",
+  "#9a3947",
+  "#b46c56",
+  "#82504a",
+  "#d888c2",
+];
 export function AvatarEditor({
   value,
   onChange,
@@ -100,22 +148,45 @@ export function AvatarEditor({
   const categories: { key: Category; label: string }[] = [
     { key: "style", label: "Основа" },
     ...parts,
-    { key: "colors", label: "Цвета" },
   ];
   const part = parts.find((item) => item.key === selected);
-  const partColor =
-    selected === "brows"
-      ? ({ key: "browColor", label: "Цвет бровей" } as const)
-      : selected === "glasses"
-        ? ({ key: "glassesColor", label: "Цвет очков" } as const)
-        : selected === "extra"
-          ? ({
-              key: "extraColor",
-              label: girl ? "Цвет серёг" : "Цвет бороды",
-            } as const)
-          : selected === "mouth" && girl
-            ? ({ key: "mouthColor", label: "Цвет губ" } as const)
-            : null;
+  const partColor: { key: ColorKey; label: string; presets: string[] } | null =
+    selected === "face"
+      ? { key: "skin", label: "Цвет кожи", presets: skinColors }
+      : selected === "backHair" || selected === "frontHair"
+        ? { key: "hair", label: "Цвет волос", presets: hairColors }
+        : selected === "clothes"
+          ? { key: "outfit", label: "Цвет одежды", presets: outfitColors }
+          : selected === "brows"
+            ? { key: "browColor", label: "Цвет бровей", presets: hairColors }
+            : selected === "glasses"
+              ? {
+                  key: "glassesColor",
+                  label: "Цвет очков",
+                  presets: accessoryColors,
+                }
+              : selected === "extra"
+                ? {
+                    key: "extraColor",
+                    label: girl ? "Цвет серёг" : "Цвет бороды",
+                    presets: girl ? accessoryColors : hairColors,
+                  }
+                : selected === "mouth" && girl
+                  ? {
+                      key: "mouthColor",
+                      label: "Цвет губ",
+                      presets: mouthColors,
+                    }
+                  : null;
+  function setColor(key: ColorKey, color: string) {
+    onChange({
+      ...value,
+      [key]: color,
+      ...(key === "hair" && !girl && value.extraColor === value.hair
+        ? { extraColor: color }
+        : {}),
+    });
+  }
   function setStyle(style: Avatar["style"]) {
     onChange({
       ...defaultAvatar,
@@ -182,6 +253,52 @@ export function AvatarEditor({
         )}
         {part && (
           <>
+            {partColor && (
+              <div
+                className={styles.partColor}
+                role="group"
+                aria-label={partColor.label}
+              >
+                <span className={styles.colorTitle}>{partColor.label}</span>
+                <div className={styles.swatches}>
+                  {partColor.presets.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      className={styles.swatch}
+                      style={{ backgroundColor: color }}
+                      aria-label={`${partColor.label}: ${color}`}
+                      aria-pressed={
+                        value[partColor.key].toLowerCase() ===
+                        color.toLowerCase()
+                      }
+                      onClick={() => setColor(partColor.key, color)}
+                    />
+                  ))}
+                  <label
+                    className={styles.palette}
+                    data-active={
+                      !partColor.presets.some(
+                        (color) =>
+                          color.toLowerCase() ===
+                          value[partColor.key].toLowerCase(),
+                      )
+                    }
+                    title="Выбрать другой цвет"
+                  >
+                    <span className={styles.paletteText}>Другой цвет</span>
+                    <input
+                      type="color"
+                      aria-label={`${partColor.label}: выбрать другой цвет`}
+                      value={value[partColor.key]}
+                      onChange={(event) =>
+                        setColor(partColor.key, event.target.value)
+                      }
+                    />
+                  </label>
+                </div>
+              </div>
+            )}
             <div className={styles.options}>
               {part.optional && (
                 <button
@@ -215,50 +332,7 @@ export function AvatarEditor({
                 );
               })}
             </div>
-            {partColor && (
-              <label className={styles.partColor}>
-                {partColor.label}
-                <input
-                  type="color"
-                  value={value[partColor.key]}
-                  onChange={(event) =>
-                    onChange({ ...value, [partColor.key]: event.target.value })
-                  }
-                />
-              </label>
-            )}
           </>
-        )}
-        {selected === "colors" && (
-          <div className={styles.colors}>
-            {(
-              [
-                ["skin", "Цвет кожи"],
-                ["hair", "Цвет волос"],
-                ["outfit", "Цвет одежды"],
-              ] as const
-            ).map(([key, label]) => (
-              <label key={key}>
-                {label}
-                <input
-                  type="color"
-                  value={value[key]}
-                  onChange={(event) => {
-                    const color = event.target.value;
-                    onChange({
-                      ...value,
-                      [key]: color,
-                      ...(key === "hair" &&
-                      !girl &&
-                      value.extraColor === value.hair
-                        ? { extraColor: color }
-                        : {}),
-                    });
-                  }}
-                />
-              </label>
-            ))}
-          </div>
         )}
       </div>
     </div>
