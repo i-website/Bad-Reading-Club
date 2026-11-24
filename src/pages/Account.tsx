@@ -6,7 +6,13 @@ import {
   type ReactNode,
 } from "react";
 import styles from "./Account.module.scss";
-import { BookOpen, Camera, LogOut, Pencil } from "lucide-react";
+import { BookOpen, Camera, LogOut, Pencil, Star } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Media } from "../components/Media";
+import type { Book } from "../types";
+import { useRatings } from "../features/ratings/useRatings";
+import { DEMO_MEMBER_TOKEN, memberFetch } from "../lib/memberApi";
+import { demoMode } from "../lib/supabase";
 import {
   AvatarEditor,
   AvatarPreview,
@@ -25,7 +31,7 @@ async function request(
 ): Promise<Session> {
   let response: Response;
   try {
-    response = await fetch(
+    response = await memberFetch(
       `/api/auth.php?action=${action}`,
       csrf
         ? {
@@ -131,15 +137,16 @@ function EditScreen({
   );
 }
 
-export function Account() {
+export function Account({ books }: { books: Book[] }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState(demoMode ? DEMO_MEMBER_TOKEN : "");
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState<Avatar>(defaultAvatar);
   const [edit, setEdit] = useState<"name" | "avatar" | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const ratings = useRatings();
   useEffect(() => {
     let active = true;
     request("session")
@@ -163,6 +170,7 @@ export function Account() {
     setBusy(true);
     try {
       setSession(await request("login", session.csrf, { token }));
+      await ratings.refresh();
       setToken("");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Не удалось войти.");
@@ -207,6 +215,8 @@ export function Account() {
     try {
       await request("logout", session.csrf);
       setSession(await request("session"));
+      setToken(demoMode ? DEMO_MEMBER_TOKEN : "");
+      await ratings.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Не удалось выйти.");
     } finally {
@@ -231,7 +241,7 @@ export function Account() {
     );
 
   return (
-    <section className={styles.account}>
+    <section>
       {!session?.user && <h1>Войти</h1>}
       {loading && <p>Загружаем…</p>}
       {error && !edit && (
@@ -273,7 +283,45 @@ export function Account() {
               <BookOpen size={19} aria-hidden="true" />
               Мои оценки и отзывы
             </h2>
-            <p>Здесь появятся ваши оценки и отзывы о книгах.</p>
+            {ratings.loading && <p>Загружаем оценки…</p>}
+            {ratings.error && <p role="alert">{ratings.error}</p>}
+            {ratings.data && ratings.data.mine.length === 0 && (
+              <p>Здесь появятся ваши оценки и отзывы о книгах.</p>
+            )}
+            {ratings.data && ratings.data.mine.length > 0 && (
+              <ul className={styles.ratingList}>
+                {ratings.data.mine.map((item) => {
+                  const book = books.find((entry) => entry.id === item.book_id);
+                  return book ? (
+                    <li key={item.book_id}>
+                      <Link
+                        className={styles.ratingCard}
+                        to={`/books/${book.slug}`}
+                      >
+                        <Media
+                          path={book.cover_path}
+                          alt=""
+                          className={styles.ratingCover}
+                        />
+                        <div className={styles.ratingDetails}>
+                          <strong>{book.title}</strong>
+                          <span className={styles.ratingAuthor}>
+                            {book.author}
+                          </span>
+                          {item.review && (
+                            <p className={styles.reviewText}>{item.review}</p>
+                          )}
+                        </div>
+                        <span className={styles.ratingScore}>
+                          <Star size={17} aria-hidden="true" /> {item.score}{" "}
+                          <span>/ 10</span>
+                        </span>
+                      </Link>
+                    </li>
+                  ) : null;
+                })}
+              </ul>
+            )}
           </section>
           <button
             className={styles.logout}
@@ -315,7 +363,7 @@ export function Account() {
           <>
             <p>Введите токен, который выдал администратор клуба.</p>
             <form
-              className={styles.form}
+              className={`${styles.form} ${styles.loginForm}`}
               onSubmit={(event) => void login(event)}
             >
               <label>

@@ -8,4 +8,9 @@ return [
     'password' => '',
     // SHA-256 hash of a long, randomly generated administrator key.
     'admin_key_hash' => '',
+    // Use 'demo' for the built-in schedule, or 'supabase' for published meetings.
+    'ratings_schedule_source' => 'demo',
+    'club_timezone' => 'Asia/Irkutsk',
+    'supabase_url' => '',
+    'supabase_publishable_key' => '',
 ];

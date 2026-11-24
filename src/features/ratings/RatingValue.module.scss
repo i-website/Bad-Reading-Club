@@ -1,4 +1,9 @@
-﻿.low {
+.value {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.low {
   color: #b42318;
 }
 .medium {

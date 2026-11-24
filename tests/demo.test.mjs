@@ -26,6 +26,10 @@ let buildSchedule;
 let ratingTone;
 let restoreRoute;
 let sortRanking;
+let combineRatings;
+let memberFetch;
+let demoMemberToken;
+let bookDescriptions;
 
 before(async () => {
   server = await createServer({
@@ -44,10 +48,184 @@ before(async () => {
   ).ratingTone;
   restoreRoute = (await server.ssrLoadModule("/src/routeBootstrap.ts"))
     .restoreRoute;
-  sortRanking = (await server.ssrLoadModule("/src/features/ratings/ranking.ts")).sortRanking;
+  ({ sortRanking, combineRatings } = await server.ssrLoadModule(
+    "/src/features/ratings/ranking.ts",
+  ));
+  ({ memberFetch, DEMO_MEMBER_TOKEN: demoMemberToken } =
+    await server.ssrLoadModule("/src/lib/memberApi.ts"));
+  ({ bookDescriptions } = await server.ssrLoadModule(
+    "/src/lib/bookDescriptions.ts",
+  ));
 });
 after(async () => {
   await server?.close();
+});
+
+test("new votes are combined with historical book ratings by vote count", () => {
+  const previous = demoBookForRating();
+  const book = {
+    id: previous.bookId,
+    title: previous.title,
+    author: previous.author,
+  };
+  const [result] = combineRatings(
+    [book],
+    [{ book_id: book.id, votes: 2, total: 18 }],
+  );
+  assert.equal(result.votes, previous.votes + 2);
+  assert.ok(
+    Math.abs(
+      result.rating -
+        (previous.rating * previous.votes + 18) / (previous.votes + 2),
+    ) < 1e-10,
+  );
+});
+
+function demoBookForRating() {
+  return mockData.pastBooks.find(
+    (book) => book.rating != null && book.votes > 0,
+  );
+}
+
+test("the demonstration catalogue has descriptions without overwriting existing edits", async () => {
+  for (const book of [...mockData.pastBooks, ...mockData.winterMeetings]) {
+    assert.ok(
+      bookDescriptions[book.bookId],
+      `missing description: ${book.title}`,
+    );
+  }
+  const { data: books } = await demo.from("books").select("*");
+  for (const item of [...mockData.pastBooks, ...mockData.winterMeetings]) {
+    assert.ok(
+      books.find((book) => book.id === item.bookId)?.description,
+      `missing demo description: ${item.title}`,
+    );
+  }
+  const snapshot = localStorage.getItem("bad-reading-club-demo-v1");
+  try {
+    const saved = JSON.parse(snapshot);
+    saved.mockDatasetVersion = 4;
+    saved.books.find((book) => book.id === "club-past-1").description =
+      "Моё описание";
+    saved.books.find((book) => book.id === "club-past-2").description = "";
+    localStorage.setItem("bad-reading-club-demo-v1", JSON.stringify(saved));
+    const updated = (await demo.from("books").select("*")).data;
+    assert.equal(
+      updated.find((book) => book.id === "club-past-1").description,
+      "Моё описание",
+    );
+    assert.equal(
+      updated.find((book) => book.id === "club-past-2").description,
+      bookDescriptions["club-past-2"],
+    );
+  } finally {
+    localStorage.setItem("bad-reading-club-demo-v1", snapshot);
+  }
+});
+
+test("Pages demo account, ratings, reviews and profiles work without network", async () => {
+  localStorage.removeItem("bad-reading-club-demo-member-v1");
+  localStorage.removeItem("bad-reading-club-demo-member-token");
+  localStorage.removeItem("bad-reading-club-demo-member-session");
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = () => {
+    throw new Error("Demo mode must not make network requests");
+  };
+  const get = async (action) => {
+    const response = await memberFetch(`/api/auth.php?action=${action}`);
+    return { response, data: await response.json() };
+  };
+  const post = async (action, body) => {
+    const response = await memberFetch(`/api/auth.php?action=${action}`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+    return { response, data: await response.json() };
+  };
+  try {
+    assert.equal((await get("session")).data.user, null);
+    localStorage.setItem("bad-reading-club-demo-member-token", demoMemberToken);
+    assert.ok((await get("session")).data.user);
+    assert.equal(localStorage.getItem("bad-reading-club-demo-member-token"), null);
+    await post("logout", {});
+    assert.equal(
+      (await post("login", { token: "wrong" })).response.status,
+      401,
+    );
+    assert.ok(
+      (await get("reviews&bookId=club-past-27")).data.reviews.length >= 2,
+    );
+    const login = await post("login", { token: demoMemberToken });
+    assert.equal(login.data.user.name, "Николай");
+    assert.equal(localStorage.getItem("bad-reading-club-demo-member-token"), null);
+    assert.notEqual(localStorage.getItem("bad-reading-club-demo-member-session"), demoMemberToken);
+    assert.equal((await get("session")).data.user.name, "Николай");
+    const saved = await post("rate", {
+      bookId: "club-past-1",
+      score: 8,
+      review: "Тестовый отзыв",
+    });
+    assert.equal(saved.response.status, 200);
+    const changed = await post("rate", {
+      bookId: "club-past-1",
+      score: 9,
+      review: "Новый отзыв",
+    });
+    assert.equal(changed.response.status, 200);
+    const mine = (await get("ratings")).data.mine.filter(
+      (item) => item.book_id === "club-past-1",
+    );
+    assert.equal(mine.length, 1);
+    assert.equal(mine[0].score, 9);
+    assert.equal(
+      (await get("reviews&bookId=club-past-1")).data.reviews[0].review,
+      "Новый отзыв",
+    );
+    assert.equal(
+      (await post("rate", { bookId: "unknown-book", score: 9, review: "" }))
+        .response.status,
+      403,
+    );
+    const avatar = login.data.user.avatar;
+    assert.equal(
+      (await post("profile", { name: "Тест", avatar })).data.user.name,
+      "Тест",
+    );
+    await post("logout", {});
+    assert.equal((await get("session")).data.user, null);
+  } finally {
+    globalThis.fetch = originalFetch;
+    localStorage.removeItem("bad-reading-club-demo-member-v1");
+    localStorage.removeItem("bad-reading-club-demo-member-token");
+    localStorage.removeItem("bad-reading-club-demo-member-session");
+  }
+});
+
+test("demo rating eligibility follows meetings edited in the same browser", async () => {
+  const snapshot = localStorage.getItem("bad-reading-club-demo-v1");
+  try {
+    await demo
+      .from("books")
+      .insert({ id: "eligibility-test-book", title: "Test", published: true });
+    const bookQuery = "rating-eligibility&bookId=eligibility-test-book";
+    async function canRate() {
+      const result = await memberFetch(`/api/auth.php?action=${bookQuery}`);
+      return (await result.json()).eligible;
+    }
+    assert.equal(await canRate(), false);
+    await demo
+      .from("meetings")
+      .update({ starts_at: "2000-01-01" })
+      .eq("book_id", "eligibility-test-book");
+    assert.equal(await canRate(), true);
+    await demo
+      .from("meetings")
+      .update({ starts_at: "2100-01-01" })
+      .eq("book_id", "eligibility-test-book");
+    assert.equal(await canRate(), false);
+  } finally {
+    localStorage.setItem("bad-reading-club-demo-v1", snapshot);
+  }
 });
 
 test("a new book gets a meeting and its optional price survives edits", async () => {
@@ -345,8 +523,14 @@ test("equal scores retain place order when sorting by rating", () => {
     { book: { title: "Я" }, rating: 8.25, rank: 5, votes: 24 },
     { book: { title: "Б" }, rating: null, rank: null, votes: null },
   ];
-  assert.deepEqual(sortRanking(entries, "rating").map((entry) => entry.rank), [5, 6, null]);
-  assert.deepEqual(sortRanking(entries, "title").map((entry) => entry.book.title), ["А", "Б", "Я"]);
+  assert.deepEqual(
+    sortRanking(entries, "rating").map((entry) => entry.rank),
+    [5, 6, null],
+  );
+  assert.deepEqual(
+    sortRanking(entries, "title").map((entry) => entry.book.title),
+    ["А", "Б", "Я"],
+  );
 });
 
 test("direct routes and legacy hash links restore without losing parameters", () => {

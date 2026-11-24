@@ -61,7 +61,7 @@ export default function App() {
   return (
     <Layout settings={data.settings}>
       <Routes>
-        <Route path="/account" element={<Account />} />
+        <Route path="/account" element={<Account books={data.books} />} />
         <Route
           path="/admin/*"
           element={

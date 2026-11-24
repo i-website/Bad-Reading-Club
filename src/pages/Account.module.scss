@@ -1,11 +1,10 @@
-.account {
-  max-width: 900px;
-  margin: 0 auto;
-}
 .form {
   display: grid;
   gap: 17px;
   margin: 24px 0;
+}
+.loginForm {
+  max-width: 600px;
 }
 .profile {
   display: flex;
@@ -93,6 +92,61 @@
   color: #687b70;
   margin: 0 0 0 31px;
   font-size: 0.9rem;
+}
+.ratingList {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+}
+.ratingCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid #eee0d8;
+  border-radius: 10px;
+  background: #fff9f4;
+}
+.ratingCard:hover {
+  background: #e9eee5;
+}
+.ratingCover {
+  flex: none;
+  width: 52px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 4px;
+  font-size: 0.5rem;
+}
+.ratingDetails {
+  display: grid;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.ratingAuthor {
+  color: #687b70;
+  font-size: 0.85rem;
+}
+.ratingScore {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--club-green-dark);
+  white-space: nowrap;
+}
+.ratingScore span {
+  color: #687b70;
+  font-size: 0.85rem;
+}
+.reviews .reviewText {
+  margin: 5px 0 0;
+  color: var(--club-green-text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .error {
   color: #b42318;

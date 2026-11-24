@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once dirname(__DIR__) . '/rating_eligibility.php';
 
 // Run with: php -S 127.0.0.1:8000 -t backend/public
 header('Content-Type: application/json; charset=utf-8');
@@ -37,11 +38,61 @@ try {
         }
         respond(200, ['user' => $user, 'csrf' => $_SESSION['csrf']]);
     }
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'ratings') {
+        $aggregate = $db->query('SELECT book_id, COUNT(*) AS votes, SUM(score) AS total FROM member_ratings GROUP BY book_id')->fetchAll(PDO::FETCH_ASSOC);
+        $mine = [];
+        if (isset($_SESSION['member_id'])) {
+            $query = $db->prepare('SELECT book_id, score, review FROM member_ratings WHERE member_id = ? ORDER BY updated_at DESC');
+            $query->execute([$_SESSION['member_id']]);
+            $mine = $query->fetchAll(PDO::FETCH_ASSOC);
+        }
+        respond(200, ['ratings' => $aggregate, 'mine' => $mine, 'signedIn' => isset($_SESSION['member_id']), 'csrf' => $_SESSION['csrf']]);
+    }
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'reviews') {
+        $bookId = is_string($_GET['bookId'] ?? null) ? $_GET['bookId'] : '';
+        if (!preg_match('/^[a-zA-Z0-9_-]{1,128}$/D', $bookId)) respond(400, ['error' => 'Книга не найдена.']);
+        $query = $db->prepare("SELECT r.score, r.review, r.updated_at, m.name, m.avatar, (r.member_id = ?) AS is_mine FROM member_ratings r JOIN members m ON m.id = r.member_id WHERE r.book_id = ? AND r.review IS NOT NULL AND r.review <> '' ORDER BY r.updated_at DESC, r.member_id DESC");
+        $query->execute([$_SESSION['member_id'] ?? 0, $bookId]);
+        $reviews = array_map(static function (array $row): array {
+            $row['avatar'] = isset($row['avatar']) ? json_decode($row['avatar'], true) : null;
+            $row['is_mine'] = (bool) $row['is_mine'];
+            return $row;
+        }, $query->fetchAll(PDO::FETCH_ASSOC));
+        respond(200, ['reviews' => $reviews]);
+    }
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'rating-eligibility') {
+        $bookId = is_string($_GET['bookId'] ?? null) ? $_GET['bookId'] : '';
+        if (!preg_match('/^[a-zA-Z0-9_-]{1,128}$/D', $bookId)) respond(400, ['error' => 'Книга не найдена.']);
+        $eligible = ratingEligible($bookId, $config);
+        if ($eligible === null) respond(503, ['error' => 'Не удалось проверить дату встречи. Попробуйте позже.']);
+        respond(200, ['eligible' => $eligible]);
+    }
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') respond(405, ['error' => 'Метод не поддерживается.']);
     if (!hash_equals($_SESSION['csrf'], $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '')) respond(403, ['error' => 'Сессия устарела. Обновите страницу.']);
     if ($action === 'logout') {
         $_SESSION = [];
         session_regenerate_id(true);
+        respond(200, ['ok' => true]);
+    }
+    if ($action === 'rate') {
+        if (!isset($_SESSION['member_id'])) respond(401, ['error' => 'Войдите в аккаунт, чтобы оценить книгу.']);
+        $input = json_decode(file_get_contents('php://input'), true);
+        $bookId = is_array($input) && is_string($input['bookId'] ?? null) ? $input['bookId'] : '';
+        $score = is_array($input) ? ($input['score'] ?? null) : null;
+        if (!preg_match('/^[a-zA-Z0-9_-]{1,128}$/D', $bookId) || !is_int($score) || $score < 1 || $score > 10) respond(400, ['error' => 'Выберите оценку от 1 до 10.']);
+        $hasReview = array_key_exists('review', $input);
+        if ($hasReview && (!is_string($input['review']) || strlen($input['review']) > 8000)) respond(400, ['error' => 'Отзыв слишком длинный.']);
+        $review = $hasReview ? trim($input['review']) : null;
+        $eligible = ratingEligible($bookId, $config);
+        if ($eligible === null) respond(503, ['error' => 'Не удалось проверить дату встречи. Попробуйте позже.']);
+        if (!$eligible) respond(403, ['error' => 'Оценить книгу можно на следующий день после встречи.']);
+        if ($hasReview) {
+            $query = $db->prepare('INSERT INTO member_ratings (member_id, book_id, score, review) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE score = VALUES(score), review = VALUES(review)');
+            $query->execute([$_SESSION['member_id'], $bookId, $score, $review === '' ? null : $review]);
+        } else {
+            $query = $db->prepare('INSERT INTO member_ratings (member_id, book_id, score) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE score = VALUES(score)');
+            $query->execute([$_SESSION['member_id'], $bookId, $score]);
+        }
         respond(200, ['ok' => true]);
     }
     if ($action === 'profile') {

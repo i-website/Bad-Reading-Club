@@ -1,0 +1,114 @@
+.wrapper {
+  border-top: 1px solid #deded5;
+  margin-top: 24px;
+  padding-top: 24px;
+}
+.rating {
+  background: #e9eee5;
+  border-radius: 10px;
+  padding: 20px;
+}
+.rating h2 {
+  font-size: 1.25rem;
+  margin-bottom: 16px;
+}
+.rating p {
+  margin-bottom: 14px;
+}
+.rating a {
+  color: var(--club-green-dark);
+  text-decoration: underline;
+}
+.prompt {
+  color: #687b70;
+  font-size: 0.9rem;
+}
+.scores {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.score {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+.score input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.score span {
+  display: grid;
+  place-items: center;
+  min-height: 52px;
+  border: 1px solid #c9d7cb;
+  border-radius: 7px;
+  background: var(--club-background);
+  color: var(--club-green-text);
+}
+.score input:checked + span {
+  background: var(--club-green-dark);
+  border-color: var(--club-green-dark);
+  color: white;
+}
+.score input:focus-visible + span {
+  outline: 3px solid #8cab91;
+  outline-offset: 2px;
+}
+.scale {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: #687b70;
+  font-size: 0.8rem;
+  margin: 14px 0 22px;
+}
+.submit {
+  width: 100%;
+}
+.reviewLabel {
+  margin: 0 0 18px;
+}
+.reviewOnly {
+  border-top: 1px solid #c9d7cb;
+  margin-top: 20px;
+  padding-top: 20px;
+}
+.reviewLabel span {
+  color: #687b70;
+  font-size: 0.8rem;
+}
+.reviewLabel textarea {
+  resize: vertical;
+}
+.editReview {
+  background: transparent;
+  color: var(--club-green-dark);
+  padding: 0;
+  border: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.cancel {
+  display: block;
+  margin: 12px auto 0;
+  background: transparent;
+  border: 0;
+  color: var(--club-green-text);
+}

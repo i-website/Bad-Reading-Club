@@ -1,4 +1,5 @@
 import { pastBooks, winterMeetings } from "./mockData";
+import { bookDescriptions } from "./bookDescriptions";
 type RecordData = Record<string, unknown>;
 type Table =
   "books" | "meetings" | "meeting_photos" | "club_settings" | "admin_users";
@@ -52,7 +53,7 @@ function read(): Database {
           slug: item.slug,
           title: item.title,
           author: item.author,
-          description: "",
+          description: bookDescriptions[item.bookId] ?? "",
           cover_path: null,
           published: true,
         });
@@ -219,6 +220,21 @@ function read(): Database {
       }
     }
     db.mockDatasetVersion = 4;
+    write(db);
+  }
+  if ((db.mockDatasetVersion ?? 0) < 5) {
+    const sourceBooks = [...pastBooks, ...winterMeetings];
+    for (const book of db.books) {
+      const source = sourceBooks.find(
+        (item) =>
+          item.bookId === book.id &&
+          item.title === book.title &&
+          item.author === book.author,
+      );
+      if (source && !String(book.description ?? "").trim())
+        book.description = bookDescriptions[source.bookId] ?? "";
+    }
+    db.mockDatasetVersion = 5;
     write(db);
   }
   return db;
