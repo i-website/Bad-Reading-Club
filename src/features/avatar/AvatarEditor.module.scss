@@ -8,8 +8,8 @@
 }
 .editor > .preview {
   flex: none;
-  width: min(100%, 190px, 23vh);
-  width: min(100%, 190px, 23dvh);
+  width: min(100%, 190px);
+  width: min(100%, 190px, 23svh);
 }
 .preview {
   position: relative;
