@@ -1,17 +1,24 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=SUSE+Mono:wght@500&display=swap");
 @import "tailwindcss" layer(tailwind);
 :root {
-  --club-green: #0b523d;
-  --club-green-dark: #0b523d;
+  --club-green: #288b67;
+  --club-green-dark: #288b67;
   --club-green-text: #143e30;
   --club-background: #faf2ea;
   --club-accent: var(--club-green-dark);
-  font-family: Arial, sans-serif;
+  font-family: "SUSE Mono", "JetBrains Mono", monospace;
+  font-weight: 500;
+  word-spacing: -0.2em;
   color: var(--club-green-text);
   background: var(--club-background);
   font-synthesis: none;
 }
 * {
   box-sizing: border-box;
+}
+strong,
+b {
+  font-weight: 500;
 }
 body {
   margin: 0;
@@ -92,8 +99,8 @@ p {
 h1,
 h2,
 h3 {
-  font-family: Arial, sans-serif;
-  font-weight: 700;
+  font-family: inherit;
+  font-weight: 500;
 }
 h1 {
   color: var(--club-green-dark);

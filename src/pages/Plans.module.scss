@@ -50,7 +50,7 @@
   height: 11px;
   transform: translateY(-50%);
   border-radius: 50%;
-  background: var(--club-green-dark);
+  background: #facdda;
 }
 .available:hover {
   background: #e3ece5;
@@ -62,20 +62,20 @@
   color: var(--club-background);
 }
 .next::before {
-  background: var(--club-accent);
+  background: #ff6062;
 }
 .badge {
   display: block;
   width: fit-content;
   margin-bottom: 4px;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 .past {
   color: #77847a;
 }
 .past::before {
-  background: #aebbb3;
+  background: #aaa;
 }
 .row strong {
   font-size: 1.05rem;
