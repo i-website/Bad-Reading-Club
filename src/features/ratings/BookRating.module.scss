@@ -9,7 +9,7 @@
   padding: 20px;
 }
 .rating h2 {
-  font-size: 1.25rem;
+  font-size: var(--font-size-section);
   margin-bottom: 16px;
 }
 .rating p {
@@ -21,7 +21,7 @@
 }
 .prompt {
   color: #687b70;
-  font-size: 0.9rem;
+  font-size: var(--font-size-caption);
 }
 .scores {
   border: 0;
@@ -76,7 +76,7 @@
   justify-content: space-between;
   gap: 10px;
   color: #687b70;
-  font-size: 0.8rem;
+  font-size: var(--font-size-caption);
   margin: 14px 0 22px;
 }
 .submit {
@@ -92,7 +92,7 @@
 }
 .reviewLabel span {
   color: #687b70;
-  font-size: 0.8rem;
+  font-size: var(--font-size-caption);
 }
 .reviewLabel textarea {
   resize: vertical;

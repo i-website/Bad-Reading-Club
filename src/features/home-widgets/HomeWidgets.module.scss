@@ -12,14 +12,14 @@
   background: #fff9f4;
 }
 .widget h2 {
-  font-size: 2rem;
+  font-size: var(--font-size-content-title);
   margin-bottom: 24px;
   color: var(--club-green-dark);
 }
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  font-size: 0.8rem;
+  font-size: var(--font-size-caption);
   color: var(--club-green-text);
   margin-bottom: 12px;
 }
@@ -77,7 +77,7 @@
 .book span,
 .date {
   color: var(--club-green-text);
-  font-size: 0.9rem;
+  font-size: var(--font-size-caption);
 }
 .date {
   display: inline-flex;
@@ -113,9 +113,6 @@
     grid-column: 2;
     align-self: start;
     text-align: left;
-  }
-  .widget h2 {
-    font-size: 1.6rem;
   }
 }
 @media (max-width: 400px) {

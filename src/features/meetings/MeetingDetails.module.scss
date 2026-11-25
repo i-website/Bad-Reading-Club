@@ -1,6 +1,6 @@
 ﻿.details .heading {
-  font-size: 1.4rem;
-  line-height: 1.2;
+  font-size: var(--font-size-section);
+  line-height: var(--line-height-heading);
   margin: 0 0 14px;
 }
 .rows {
@@ -26,7 +26,7 @@
   display: block;
   margin-top: 4px;
   color: #687b70;
-  font-size: 0.85rem;
+  font-size: var(--font-size-caption);
 }
 .muted {
   color: #687b70;

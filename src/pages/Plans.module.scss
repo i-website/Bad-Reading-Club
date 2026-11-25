@@ -1,13 +1,13 @@
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  font-size: 0.8rem;
+  font-size: var(--font-size-caption);
   color: var(--club-green-text);
   margin-bottom: 18px;
 }
 .page-title {
-  font-size: clamp(2.2rem, 4vw, 3.3rem);
-  line-height: 1.05;
+  font-size: var(--font-size-page-title);
+  line-height: var(--line-height-heading);
   margin-bottom: 14px;
 }
 .subtitle {
@@ -68,7 +68,7 @@
   display: block;
   width: fit-content;
   margin-bottom: 4px;
-  font-size: 0.8rem;
+  font-size: var(--font-size-caption);
   font-weight: 500;
 }
 .past {
@@ -78,7 +78,7 @@
   background: #aaa;
 }
 .row strong {
-  font-size: 1.05rem;
+  font-size: var(--font-size-card-title);
 }
 .book,
 .row-meta {
@@ -88,7 +88,7 @@
 .row p {
   margin: 5px 0 0;
   color: inherit;
-  font-size: 0.9rem;
+  font-size: var(--font-size-caption);
 }
 .row-meta small {
   display: block;
@@ -126,7 +126,7 @@
   .row-meta {
     grid-column: 2;
     grid-row: 2;
-    font-size: 0.9rem;
+    font-size: var(--font-size-caption);
   }
   .chevron {
     grid-column: 3;
@@ -135,6 +135,6 @@
 }
 @media (max-width: 520px) {
   .page-title {
-    font-size: 2.2rem;
+    font-size: var(--font-size-page-title);
   }
 }

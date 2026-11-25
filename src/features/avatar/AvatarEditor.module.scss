@@ -45,7 +45,7 @@
   flex: none;
   border-radius: 20px;
   padding: 8px 13px;
-  font-size: 0.85rem;
+  font-size: var(--font-size-caption);
 }
 .category {
   background: transparent;
@@ -81,7 +81,7 @@
 .colorTitle {
   display: block;
   color: #687b70;
-  font-size: 0.85rem;
+  font-size: var(--font-size-caption);
   margin-bottom: 10px;
 }
 .swatches {

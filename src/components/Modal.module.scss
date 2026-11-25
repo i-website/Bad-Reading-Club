@@ -38,6 +38,6 @@
   width: min(780px, calc(100vw - 32px));
 }
 .modal h2 {
-  font-size: 1.8rem;
+  font-size: var(--font-size-dialog-title);
   margin-bottom: 16px;
 }

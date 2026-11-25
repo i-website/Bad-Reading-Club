@@ -7,7 +7,7 @@
   padding: 13px 21px;
   display: inline-block;
   text-align: center;
-  font-size: 0.94rem;
+  font-size: var(--font-size-body);
 }
 .button:hover {
   filter: brightness(0.94);
@@ -15,7 +15,7 @@
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  font-size: 0.8rem;
+  font-size: var(--font-size-caption);
   color: var(--club-green-text);
   margin-bottom: 18px;
 }
@@ -33,7 +33,7 @@
 }
 .hero h1 {
   color: var(--club-background);
-  font-size: clamp(3.5rem, 6vw, 6rem);
+  font-size: var(--font-size-hero);
   line-height: 0.88;
   letter-spacing: -0.035em;
   margin-bottom: 26px;
@@ -48,7 +48,7 @@
   font-weight: 500;
 }
 .lead {
-  font-size: 1.1rem;
+  font-size: var(--font-size-card-title);
 }
 .actions {
   display: flex;
@@ -72,9 +72,10 @@
   background: var(--club-green-dark);
   border-color: var(--club-green-dark);
   color: var(--club-background);
+  font-size: var(--font-size-caption);
 }
 .feature h2 {
-  font-size: 2.6rem;
+  font-size: var(--font-size-content-title);
   margin-bottom: 8px;
   overflow-wrap: anywhere;
 }
@@ -103,7 +104,7 @@
   font-weight: 500;
   border-radius: 5px;
   padding: 6px 10px;
-  font-size: 0.8rem;
+  font-size: var(--font-size-caption);
 }
 .details {
   margin: 22px 0;
@@ -125,9 +126,9 @@
     display: block;
     margin: 0 0 24px;
     font-family: inherit;
-    font-size: clamp(1.8rem, 6vw, 2.6rem);
+    font-size: var(--font-size-hero-mobile);
     font-weight: 500;
-    line-height: 1.1;
+    line-height: var(--line-height-heading);
   }
   .feature {
     grid-template-columns: minmax(90px, 40%) minmax(0, 1fr);
@@ -146,9 +147,9 @@
   }
   .feature h2 {
     font-family: inherit;
-    font-size: clamp(1.5rem, 5vw, 2.3rem);
+    font-size: var(--font-size-content-title);
     font-weight: 500;
-    line-height: 1.1;
+    line-height: var(--line-height-heading);
   }
   .feature .author {
     font-family: inherit;
@@ -169,13 +170,10 @@
   .feature {
     gap: 16px;
   }
-  .details {
-    font-size: 0.9rem;
-  }
 }
 @media (max-width: 360px) {
   .mobile-heading {
-    font-size: 1.6rem;
+    font-size: var(--font-size-hero-mobile);
   }
   .feature {
     grid-template-columns: minmax(84px, 35%) minmax(0, 1fr);

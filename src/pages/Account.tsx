@@ -260,7 +260,7 @@ export function Account({ books }: { books: Book[] }) {
 
   return (
     <section>
-      {!session?.user && <h1>Войти</h1>}
+      {!session?.user && <h1>{registering ? "Регистрация" : "Войти"}</h1>}
       {loading && <p>Загружаем…</p>}
       {error && !edit && (
         <p className={styles.error} role="alert">

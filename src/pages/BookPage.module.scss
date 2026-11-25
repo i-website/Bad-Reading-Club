@@ -2,7 +2,7 @@
   display: inline-block;
   margin-bottom: 22px;
   color: var(--club-green-dark);
-  font-size: 0.9rem;
+  font-size: var(--font-size-caption);
 }
 .book-hero {
   display: grid;
@@ -22,13 +22,13 @@
 }
 .page-title {
   color: var(--club-green-dark);
-  font-size: clamp(1.6rem, 3vw, 2rem);
-  line-height: 1.15;
+  font-size: var(--font-size-content-title);
+  line-height: var(--line-height-heading);
   margin-bottom: 10px;
   overflow-wrap: anywhere;
 }
 .lead {
-  font-size: 0.95rem;
+  font-size: var(--font-size-body);
   margin-bottom: 14px;
 }
 .rating {
@@ -39,13 +39,13 @@
   align-items: center;
   gap: 5px;
   color: var(--club-green-dark);
-  font-size: 1.25rem;
+  font-size: var(--font-size-section);
   margin-bottom: 8px;
 }
 .rating p span,
 .rating small {
   color: #687b70;
-  font-size: 0.85rem;
+  font-size: var(--font-size-caption);
 }
 .about {
   border-top: 1px solid #deded5;
@@ -53,7 +53,7 @@
   padding-top: 28px;
 }
 .about h2 {
-  font-size: 1.25rem;
+  font-size: var(--font-size-section);
   margin-bottom: 18px;
 }
 .prose {
@@ -67,7 +67,7 @@
   color: var(--club-green-dark);
   text-decoration: underline;
   text-underline-offset: 3px;
-  font-size: 0.9rem;
+  font-size: var(--font-size-caption);
 }
 @media (max-width: 400px) {
   .book-hero {

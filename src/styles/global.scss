@@ -6,7 +6,20 @@
   --club-green-text: #143e30;
   --club-background: #faf2ea;
   --club-accent: var(--club-green-dark);
+  --font-size-caption: 0.875rem;
+  --font-size-body: 1rem;
+  --font-size-card-title: 1.125rem;
+  --font-size-section: 1.25rem;
+  --font-size-dialog-title: 1.75rem;
+  --font-size-content-title: clamp(1.5rem, 3vw, 2rem);
+  --font-size-page-title: clamp(2rem, 4vw, 3.25rem);
+  --font-size-hero: clamp(3.5rem, 6vw, 6rem);
+  --font-size-hero-mobile: clamp(1.6rem, 6vw, 2.6rem);
+  --line-height-body: 1.5;
+  --line-height-heading: 1.15;
   font-family: "SUSE Mono", "JetBrains Mono", monospace;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
   font-weight: 500;
   word-spacing: -0.2em;
   color: var(--club-green-text);
@@ -48,7 +61,7 @@ button {
   padding: 13px 21px;
   display: inline-block;
   text-align: center;
-  font-size: 0.94rem;
+  font-size: var(--font-size-body);
 }
 button:disabled {
   opacity: 0.55;
@@ -85,7 +98,7 @@ nav {
   align-items: center;
 }
 nav a {
-  font-size: 0.9rem;
+  font-size: var(--font-size-caption);
   padding: 12px 0;
   border-bottom: 2px solid transparent;
 }
@@ -110,16 +123,18 @@ h2,
 h3 {
   font-family: inherit;
   font-weight: 500;
+  line-height: var(--line-height-heading);
 }
 h1 {
   color: var(--club-green-dark);
+  font-size: var(--font-size-page-title);
 }
 h2 {
-  font-size: 2.2rem;
-  line-height: 1.08;
+  font-size: var(--font-size-content-title);
+  line-height: var(--line-height-heading);
 }
 p {
-  line-height: 1.55;
+  line-height: var(--line-height-body);
 }
 footer {
   width: 100%;
@@ -132,7 +147,7 @@ footer {
   justify-content: space-between;
   gap: 20px;
   color: var(--club-green-text);
-  font-size: 0.85rem;
+  font-size: var(--font-size-caption);
 }
 footer a {
   margin-left: 18px;
@@ -141,14 +156,18 @@ footer a {
 label {
   display: grid;
   gap: 7px;
-  font-size: 0.92rem;
+  font-size: var(--font-size-caption);
 }
 label small {
   color: var(--club-green-text);
 }
+small {
+  font-size: var(--font-size-caption);
+}
 input,
 textarea,
 select {
+  font-size: var(--font-size-body);
   width: 100%;
   border: 1px solid #bfc8bd;
   background: #fffefa;
