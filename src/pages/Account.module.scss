@@ -6,6 +6,29 @@
 .loginForm {
   max-width: 600px;
 }
+.authLink {
+  text-decoration: underline;
+}
+.passwordField {
+  position: relative;
+  display: block;
+}
+.passwordField input {
+  padding-right: 48px;
+}
+.passwordToggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--club-green-text);
+}
 .profile {
   display: flex;
   flex-direction: column;

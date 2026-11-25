@@ -6,12 +6,24 @@ import {
   type ReactNode,
 } from "react";
 import styles from "./Account.module.scss";
-import { BookOpen, Camera, LogOut, Pencil, Star } from "lucide-react";
-import { Link } from "react-router-dom";
+import {
+  BookOpen,
+  Camera,
+  Eye,
+  EyeOff,
+  LogOut,
+  Pencil,
+  Star,
+} from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
 import { Media } from "../components/Media";
 import type { Book } from "../types";
 import { useRatings } from "../features/ratings/useRatings";
-import { DEMO_MEMBER_TOKEN, memberFetch } from "../lib/memberApi";
+import {
+  DEMO_MEMBER_EMAIL,
+  DEMO_MEMBER_PASSWORD,
+  memberFetch,
+} from "../lib/memberApi";
 import { demoMode } from "../lib/supabase";
 import {
   AvatarEditor,
@@ -139,7 +151,15 @@ function EditScreen({
 
 export function Account({ books }: { books: Book[] }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [token, setToken] = useState(demoMode ? DEMO_MEMBER_TOKEN : "");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const registering = searchParams.get("register") === "1";
+  const [email, setEmail] = useState(demoMode ? DEMO_MEMBER_EMAIL : "");
+  const [password, setPassword] = useState(
+    demoMode ? DEMO_MEMBER_PASSWORD : "",
+  );
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState<Avatar>(defaultAvatar);
   const [edit, setEdit] = useState<"name" | "avatar" | null>(null);
@@ -166,14 +186,26 @@ export function Account({ books }: { books: Book[] }) {
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!session) return;
+    if (registering && password !== confirmPassword) {
+      setError("Пароли не совпадают.");
+      return;
+    }
     setError("");
     setBusy(true);
     try {
-      setSession(await request("login", session.csrf, { token }));
+      setSession(
+        await request(registering ? "register" : "login", session.csrf, {
+          email,
+          password,
+          name,
+        }),
+      );
+      if (registering) setSearchParams({}, { replace: true });
       await ratings.refresh();
-      setToken("");
+      setPassword("");
+      setConfirmPassword("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Не удалось войти.");
+      setError(e instanceof Error ? e.message : "Не удалось продолжить.");
     } finally {
       setBusy(false);
     }
@@ -215,7 +247,7 @@ export function Account({ books }: { books: Book[] }) {
     try {
       await request("logout", session.csrf);
       setSession(await request("session"));
-      setToken(demoMode ? DEMO_MEMBER_TOKEN : "");
+      setPassword(demoMode ? DEMO_MEMBER_PASSWORD : "");
       await ratings.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Не удалось выйти.");
@@ -361,25 +393,117 @@ export function Account({ books }: { books: Book[] }) {
       ) : (
         session && (
           <>
-            <p>Введите токен, который выдал администратор клуба.</p>
+            <p>
+              {registering
+                ? "Создайте аккаунт участника клуба."
+                : "Войдите с email и паролем."}
+            </p>
             <form
               className={`${styles.form} ${styles.loginForm}`}
               onSubmit={(event) => void login(event)}
             >
+              {registering && (
+                <label>
+                  Имя
+                  <input
+                    autoComplete="name"
+                    required
+                    maxLength={80}
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                  />
+                </label>
+              )}
               <label>
-                Токен
+                Email
                 <input
-                  type="password"
-                  autoComplete="off"
+                  type="email"
+                  autoComplete="email"
                   required
-                  value={token}
-                  onChange={(event) => setToken(event.target.value)}
+                  maxLength={254}
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
                 />
               </label>
+              <label>
+                Пароль
+                <span className={styles.passwordField}>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    autoComplete={
+                      registering ? "new-password" : "current-password"
+                    }
+                    required
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className={styles.passwordToggle}
+                    aria-label={
+                      showPassword ? "Скрыть пароль" : "Показать пароль"
+                    }
+                    aria-pressed={showPassword}
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </span>
+              </label>
+              {registering && (
+                <label>
+                  Подтвердите пароль
+                  <span className={styles.passwordField}>
+                    <input
+                      type={showConfirmation ? "text" : "password"}
+                      autoComplete="new-password"
+                      required
+                      value={confirmPassword}
+                      onChange={(event) =>
+                        setConfirmPassword(event.target.value)
+                      }
+                    />
+                    <button
+                      type="button"
+                      className={styles.passwordToggle}
+                      aria-label={
+                        showConfirmation
+                          ? "Скрыть подтверждение пароля"
+                          : "Показать подтверждение пароля"
+                      }
+                      aria-pressed={showConfirmation}
+                      onClick={() => setShowConfirmation(!showConfirmation)}
+                    >
+                      {showConfirmation ? (
+                        <EyeOff size={20} />
+                      ) : (
+                        <Eye size={20} />
+                      )}
+                    </button>
+                  </span>
+                </label>
+              )}
               <button disabled={busy} type="submit">
-                Войти
+                {registering ? "Зарегистрироваться" : "Войти"}
               </button>
             </form>
+            <p>
+              <Link
+                className={styles.authLink}
+                to={registering ? "/account" : "/account?register=1"}
+                onClick={() => {
+                  setError("");
+                  setPassword("");
+                  setConfirmPassword("");
+                  setShowPassword(false);
+                  setShowConfirmation(false);
+                }}
+              >
+                {registering
+                  ? "Уже есть аккаунт? Войти"
+                  : "Ещё нет аккаунта? Зарегистрироваться"}
+              </Link>
+            </p>
           </>
         )
       )}

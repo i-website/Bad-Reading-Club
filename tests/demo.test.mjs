@@ -28,7 +28,6 @@ let restoreRoute;
 let sortRanking;
 let combineRatings;
 let memberFetch;
-let demoMemberToken;
 let bookDescriptions;
 
 before(async () => {
@@ -51,8 +50,7 @@ before(async () => {
   ({ sortRanking, combineRatings } = await server.ssrLoadModule(
     "/src/features/ratings/ranking.ts",
   ));
-  ({ memberFetch, DEMO_MEMBER_TOKEN: demoMemberToken } =
-    await server.ssrLoadModule("/src/lib/memberApi.ts"));
+  ({ memberFetch } = await server.ssrLoadModule("/src/lib/memberApi.ts"));
   ({ bookDescriptions } = await server.ssrLoadModule(
     "/src/lib/bookDescriptions.ts",
   ));
@@ -125,7 +123,6 @@ test("the demonstration catalogue has descriptions without overwriting existing 
 
 test("Pages demo account, ratings, reviews and profiles work without network", async () => {
   localStorage.removeItem("bad-reading-club-demo-member-v1");
-  localStorage.removeItem("bad-reading-club-demo-member-token");
   localStorage.removeItem("bad-reading-club-demo-member-session");
   const originalFetch = globalThis.fetch;
   globalThis.fetch = () => {
@@ -144,21 +141,19 @@ test("Pages demo account, ratings, reviews and profiles work without network", a
   };
   try {
     assert.equal((await get("session")).data.user, null);
-    localStorage.setItem("bad-reading-club-demo-member-token", demoMemberToken);
-    assert.ok((await get("session")).data.user);
-    assert.equal(localStorage.getItem("bad-reading-club-demo-member-token"), null);
-    await post("logout", {});
     assert.equal(
-      (await post("login", { token: "wrong" })).response.status,
+      (await post("login", { email: "wrong@example.com", password: "wrong" }))
+        .response.status,
       401,
     );
     assert.ok(
       (await get("reviews&bookId=club-past-27")).data.reviews.length >= 2,
     );
-    const login = await post("login", { token: demoMemberToken });
+    const login = await post("login", {
+      email: "member@example.com",
+      password: "club-demo-2026",
+    });
     assert.equal(login.data.user.name, "Николай");
-    assert.equal(localStorage.getItem("bad-reading-club-demo-member-token"), null);
-    assert.notEqual(localStorage.getItem("bad-reading-club-demo-member-session"), demoMemberToken);
     assert.equal((await get("session")).data.user.name, "Николай");
     const saved = await post("rate", {
       bookId: "club-past-1",
@@ -196,9 +191,32 @@ test("Pages demo account, ratings, reviews and profiles work without network", a
   } finally {
     globalThis.fetch = originalFetch;
     localStorage.removeItem("bad-reading-club-demo-member-v1");
-    localStorage.removeItem("bad-reading-club-demo-member-token");
     localStorage.removeItem("bad-reading-club-demo-member-session");
   }
+});
+
+test("demo registration is open and supports email login", async () => {
+  const post = async (action, body) => {
+    const response = await memberFetch(`/api/auth.php?action=${action}`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+    return { status: response.status, data: await response.json() };
+  };
+  localStorage.removeItem("bad-reading-club-demo-credentials");
+  const account = {
+    name: "Участник",
+    email: "new@example.com",
+    password: "password123",
+  };
+  assert.equal((await post("register", account)).status, 200);
+  assert.equal((await post("register", account)).status, 409);
+  await post("logout", {});
+  assert.equal(
+    (await post("login", { email: account.email, password: "wrong" })).status,
+    401,
+  );
+  assert.equal((await post("login", account)).status, 200);
 });
 
 test("demo rating eligibility follows meetings edited in the same browser", async () => {

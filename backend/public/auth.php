@@ -125,7 +125,7 @@ try {
         if (!$member) respond(401, ['error' => 'Аккаунт не найден.']);
         respond(200, ['user' => memberData($member), 'csrf' => $_SESSION['csrf']]);
     }
-    if (!in_array($action, ['login', 'issue'], true)) respond(404, ['error' => 'Действие не найдено.']);
+    if (!in_array($action, ['login', 'register'], true)) respond(404, ['error' => 'Действие не найдено.']);
     $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     $now = time();
     $db->beginTransaction();
@@ -137,23 +137,32 @@ try {
     $db->commit();
     $input = json_decode(file_get_contents('php://input'), true);
     if (!is_array($input)) respond(400, ['error' => 'Некорректный запрос.']);
-    if ($action === 'issue') {
-        $key = is_string($input['adminKey'] ?? null) ? $input['adminKey'] : '';
-        $adminHash = $config['admin_key_hash'] ?? '';
-        if (!is_string($adminHash) || strlen($adminHash) !== 64 || !hash_equals($adminHash, hash('sha256', $key))) respond(403, ['error' => 'Неверный ключ администратора.']);
+    $email = strtolower(trim(is_string($input['email'] ?? null) ? $input['email'] : ''));
+    $password = is_string($input['password'] ?? null) ? $input['password'] : '';
+    if (strlen($email) > 254 || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($password) > 72) respond(400, ['error' => 'Проверьте email и пароль.']);
+    if ($action === 'register') {
         $name = trim(is_string($input['name'] ?? null) ? $input['name'] : '');
-        if ($name === '' || strlen($name) > 160) respond(400, ['error' => 'Укажите имя участника.']);
-        $token = bin2hex(random_bytes(32));
-        $query = $db->prepare('INSERT INTO members (name, token_hash) VALUES (?, ?)');
-        $query->execute([$name, hash('sha256', $token)]);
-        respond(200, ['token' => $token]);
+        if ($name === '' || strlen($name) > 160 || strlen($password) < 8) respond(400, ['error' => 'Проверьте имя и пароль (не менее 8 байт).']);
+        $db->beginTransaction();
+        $query = $db->prepare('SELECT id FROM members WHERE email = ?');
+        $query->execute([$email]);
+        if ($query->fetchColumn()) { $db->rollBack(); respond(409, ['error' => 'Этот email уже зарегистрирован.']); }
+        try {
+            $query = $db->prepare('INSERT INTO members (name, email, password_hash) VALUES (?, ?, ?)');
+            $query->execute([$name, $email, password_hash($password, PASSWORD_DEFAULT)]);
+        } catch (PDOException $e) {
+            if ($e->getCode() !== '23000') throw $e;
+            $db->rollBack(); respond(409, ['error' => 'Этот email уже зарегистрирован.']);
+        }
+        $member = ['id' => $db->lastInsertId(), 'name' => $name, 'avatar' => null];
+        $db->commit();
+    } else {
+        $query = $db->prepare('SELECT id, name, avatar, password_hash FROM members WHERE email = ?');
+        $query->execute([$email]);
+        $member = $query->fetch(PDO::FETCH_ASSOC);
+        if (!$member || !password_verify($password, $member['password_hash'] ?? '')) respond(401, ['error' => 'Неверный email или пароль.']);
+        unset($member['password_hash']);
     }
-    $token = trim(is_string($input['token'] ?? null) ? $input['token'] : '');
-    if (!preg_match('/^[a-f0-9]{64}$/D', $token)) respond(401, ['error' => 'Неверный токен.']);
-    $query = $db->prepare('SELECT id, name, avatar FROM members WHERE token_hash = ?');
-    $query->execute([hash('sha256', $token)]);
-    $member = $query->fetch(PDO::FETCH_ASSOC);
-    if (!$member) respond(401, ['error' => 'Неверный токен.']);
     session_regenerate_id(true);
     $_SESSION['member_id'] = (int) $member['id'];
     $_SESSION['csrf'] = bin2hex(random_bytes(32));

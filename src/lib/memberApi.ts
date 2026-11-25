@@ -3,9 +3,10 @@ import { demoDb } from "./demo";
 import { defaultAvatar, type Avatar } from "../features/avatar/AvatarEditor";
 import type { Book, Meeting } from "../types";
 
-export const DEMO_MEMBER_TOKEN = "club-demo-2026";
+export const DEMO_MEMBER_EMAIL = "member@example.com";
+export const DEMO_MEMBER_PASSWORD = "club-demo-2026";
+const demoCredentialsKey = "bad-reading-club-demo-credentials";
 const storageKey = "bad-reading-club-demo-member-v1";
-const legacyTokenKey = "bad-reading-club-demo-member-token";
 const sessionKey = "bad-reading-club-demo-member-session";
 const csrf = "demo-csrf";
 
@@ -278,11 +279,6 @@ function write(data: DemoData) {
   localStorage.setItem(storageKey, JSON.stringify(data));
 }
 function signedIn() {
-  const legacyToken = localStorage.getItem(legacyTokenKey);
-  if (legacyToken !== null) {
-    if (legacyToken === DEMO_MEMBER_TOKEN) localStorage.setItem(sessionKey, "true");
-    localStorage.removeItem(legacyTokenKey);
-  }
   return localStorage.getItem(sessionKey) === "true";
 }
 function response(data: unknown, status = 200) {
@@ -383,9 +379,36 @@ async function demoFetch(input: string, init?: RequestInit): Promise<Response> {
   } catch {
     return response({ error: "Некорректный запрос." }, 400);
   }
-  if (action === "login") {
-    if (body.token !== DEMO_MEMBER_TOKEN)
-      return response({ error: "Неверный токен." }, 401);
+  if (action === "login" || action === "register") {
+    const email =
+      typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    const password = typeof body.password === "string" ? body.password : "";
+    const saved = JSON.parse(
+      localStorage.getItem(demoCredentialsKey) || "null",
+    ) as { email: string; password: string } | null;
+    if (action === "register") {
+      if (
+        !email.includes("@") ||
+        new TextEncoder().encode(password).length < 8 ||
+        new TextEncoder().encode(password).length > 72 ||
+        typeof body.name !== "string" ||
+        !body.name.trim()
+      )
+        return response({ error: "Проверьте имя, email и пароль." }, 400);
+      if (saved?.email === email || email === DEMO_MEMBER_EMAIL)
+        return response({ error: "Этот email уже зарегистрирован." }, 409);
+      localStorage.setItem(
+        demoCredentialsKey,
+        JSON.stringify({ email, password }),
+      );
+      data.name = body.name.trim();
+      write(data);
+    } else if (!(
+      (email === DEMO_MEMBER_EMAIL && password === DEMO_MEMBER_PASSWORD) ||
+      (email === saved?.email && password === saved.password)
+    )) {
+      return response({ error: "Неверный email или пароль." }, 401);
+    }
     localStorage.setItem(sessionKey, "true");
     return response({
       user: { id: 1, name: data.name, avatar: data.avatar },
@@ -394,7 +417,6 @@ async function demoFetch(input: string, init?: RequestInit): Promise<Response> {
   }
   if (action === "logout") {
     localStorage.removeItem(sessionKey);
-    localStorage.removeItem(legacyTokenKey);
     return response({ ok: true });
   }
   if (!active) return response({ error: "Войдите в аккаунт." }, 401);
