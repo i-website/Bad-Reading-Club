@@ -22,7 +22,7 @@ export function MeetingPage({ data }: { data: Data }) {
       </section>
     );
   return (
-    <section>
+    <section className={styles.page}>
       <Link className={styles["back"]} to="/plans">
         ‹ К планам
       </Link>
@@ -39,7 +39,7 @@ export function MeetingPage({ data }: { data: Data }) {
             className={styles["book-cover"]}
           />
         </Link>
-        <div>
+        <div className={styles.content}>
           <h1 className={styles["page-title"]}>{book.title}</h1>
           <p className={styles["lead"]}>{book.author}</p>
           <Link
@@ -49,10 +49,10 @@ export function MeetingPage({ data }: { data: Data }) {
           >
             Подробнее о книге →
           </Link>
+          <aside>
+            <MeetingDetails meeting={meeting} showNotes />
+          </aside>
         </div>
-        <aside>
-          <MeetingDetails meeting={meeting} showNotes />
-        </aside>
       </div>
     </section>
   );

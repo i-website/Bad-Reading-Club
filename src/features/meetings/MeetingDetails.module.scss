@@ -22,6 +22,9 @@
   min-width: 0;
   overflow-wrap: anywhere;
 }
+.detail strong {
+  font-size: var(--font-size-date);
+}
 .weekday {
   display: block;
   margin-top: 4px;

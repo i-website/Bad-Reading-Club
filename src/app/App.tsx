@@ -4,6 +4,7 @@ import { configured, db, message } from "../lib/supabase";
 import type { ClubData as Data, Book, Meeting, Settings } from "../types";
 import { Layout } from "../components/Layout";
 import { State } from "../components/State";
+import { Loader } from "../components/Loader";
 import { Home } from "../pages/Home";
 import { Plans } from "../pages/Plans";
 import { BookPage } from "../pages/BookPage";
@@ -21,15 +22,26 @@ export default function App() {
   const [data, setData] = useState<Data>(blank);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [startedAt] = useState(() => performance.now());
   useEffect(() => {
+    let active = true;
+    let timer: number | undefined;
+    function finishLoading() {
+      const remaining = Math.max(0, 3000 - (performance.now() - startedAt));
+      timer = window.setTimeout(() => {
+        if (active) setLoading(false);
+      }, remaining);
+    }
     if (!configured) {
       setError(
         "Подключение к базе ещё не настроено. Укажите параметры Supabase в окружении.",
       );
-      setLoading(false);
-      return;
+      finishLoading();
+      return () => {
+        active = false;
+        window.clearTimeout(timer);
+      };
     }
-    let active = true;
     async function load() {
       try {
         const results = await Promise.all([
@@ -50,14 +62,16 @@ export default function App() {
             `Не удалось загрузить данные клуба. Проверьте соединение. ${message(e)}`,
           );
       } finally {
-        if (active) setLoading(false);
+        if (active) finishLoading();
       }
     }
     void load();
     return () => {
       active = false;
+      window.clearTimeout(timer);
     };
-  }, [location.pathname]);
+  }, [location.pathname, startedAt]);
+  if (loading) return <Loader />;
   return (
     <Layout settings={data.settings}>
       <Routes>
