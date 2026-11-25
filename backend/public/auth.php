@@ -19,6 +19,26 @@ function memberData(array $member): array {
     $member['avatar'] = isset($member['avatar']) ? json_decode($member['avatar'], true) : null;
     return $member;
 }
+function adminAuthorized(array $config): ?bool {
+    $base = rtrim((string) ($config['supabase_url'] ?? ''), '/');
+    $key = (string) ($config['supabase_publishable_key'] ?? '');
+    if (!filter_var($base, FILTER_VALIDATE_URL) || parse_url($base, PHP_URL_SCHEME) !== 'https' || $key === '' || preg_match('/[\r\n]/', $key)) return null;
+    $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    if (!is_string($header) || !preg_match('/^Bearer ([A-Za-z0-9._-]{1,8192})$/D', $header, $match)) return false;
+    $context = stream_context_create(['http' => [
+        'method' => 'GET',
+        'header' => "apikey: $key\r\nAuthorization: Bearer {$match[1]}\r\nAccept: application/json\r\n",
+        'timeout' => 5,
+        'ignore_errors' => true,
+        'follow_location' => 0,
+    ]]);
+    $response = @file_get_contents($base . '/rest/v1/admin_users?select=user_id&limit=1', false, $context);
+    if ($response === false || !isset($http_response_header[0])) return null;
+    if (preg_match('/\s(?:401|403)\s/', $http_response_header[0])) return false;
+    if (!preg_match('/\s200\s/', $http_response_header[0])) return null;
+    $rows = json_decode($response, true);
+    return is_array($rows) && array_is_list($rows) ? count($rows) === 1 : null;
+}
 try {
     $config = require dirname(__DIR__) . '/config.php';
     $dsn = sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4', $config['host'], $config['port'], $config['database']);
@@ -28,6 +48,13 @@ try {
     ]);
     $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
     $action = $_GET['action'] ?? 'session';
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'members') {
+        $authorized = adminAuthorized($config);
+        if ($authorized === null) respond(503, ['error' => 'Не удалось проверить права администратора.']);
+        if (!$authorized) respond(403, ['error' => 'Нет доступа к списку участников.']);
+        $members = array_map('memberData', $db->query('SELECT id, name, avatar FROM members ORDER BY name, id')->fetchAll(PDO::FETCH_ASSOC));
+        respond(200, ['members' => $members]);
+    }
     if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'session') {
         $user = null;
         if (isset($_SESSION['member_id'])) {

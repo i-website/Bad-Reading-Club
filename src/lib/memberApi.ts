@@ -334,6 +334,13 @@ async function demoFetch(input: string, init?: RequestInit): Promise<Response> {
   const member = active
     ? { id: 1, name: data.name, avatar: data.avatar }
     : null;
+  if (action === "members" && !init?.method) {
+    if (sessionStorage.getItem("brc-demo-session") !== "true")
+      return response({ error: "Нет доступа к списку участников." }, 403);
+    return response({
+      members: [{ id: 1, name: data.name, avatar: data.avatar }],
+    });
+  }
   if (action === "session" && !init?.method)
     return response({ user: member, csrf });
   if (action === "ratings" && !init?.method)

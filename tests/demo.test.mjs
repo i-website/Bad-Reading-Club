@@ -219,6 +219,21 @@ test("demo registration is open and supports email login", async () => {
   assert.equal((await post("login", account)).status, 200);
 });
 
+test("demo participant list is available only to the local administrator", async () => {
+  sessionStorage.removeItem("brc-demo-session");
+  let response = await memberFetch("/api/auth.php?action=members");
+  assert.equal(response.status, 403);
+  sessionStorage.setItem("brc-demo-session", "true");
+  response = await memberFetch("/api/auth.php?action=members");
+  const data = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(data.members.length, 1);
+  assert.ok(data.members[0].name);
+  assert.ok(data.members[0].avatar);
+  assert.equal("email" in data.members[0], false);
+  sessionStorage.removeItem("brc-demo-session");
+});
+
 test("demo rating eligibility follows meetings edited in the same browser", async () => {
   const snapshot = localStorage.getItem("bad-reading-club-demo-v1");
   try {

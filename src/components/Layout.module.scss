@@ -24,6 +24,8 @@
 .menuButton {
   display: grid;
   gap: 5px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 10px;
   border: 1px solid transparent;
   background: transparent;

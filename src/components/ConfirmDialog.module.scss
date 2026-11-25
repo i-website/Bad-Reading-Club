@@ -1,0 +1,11 @@
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+.cancel {
+  background: transparent;
+  color: var(--club-green-text);
+}

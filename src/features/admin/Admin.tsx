@@ -1,5 +1,7 @@
 import styles from "./Admin.module.scss";
+import scheduleStyles from "../../pages/Plans.module.scss";
 import { useEffect, useState, type FormEvent } from "react";
+import { Pencil, Trash2 } from "lucide-react";
 import {
   db,
   configured,
@@ -9,9 +11,18 @@ import {
 } from "../../lib/supabase";
 import { type Book, type Meeting } from "../../types";
 import { AdminForm } from "./AdminForm";
-import { PublishDialog } from "./PublishDialog";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
+import { Modal } from "../../components/Modal";
+import { MembersPanel } from "./MembersPanel";
+import { Media } from "../../components/Media";
 import { isPlaceUrl } from "../../lib/place";
-import { isDateOnly, isUpcomingMeeting } from "../../lib/format";
+import {
+  formatDate,
+  formatPrice,
+  isDateOnly,
+  isUpcomingMeeting,
+} from "../../lib/format";
+import { buildSchedule } from "../../lib/schedule";
 type Row = Meeting;
 import type { Form } from "./types";
 const initial: Record<"meetings", Form> = {
@@ -72,6 +83,22 @@ export default function Admin() {
   const [success, setSuccess] = useState("");
   const [publishing, setPublishing] = useState<Meeting | null>(null);
   const [publishError, setPublishError] = useState("");
+  const [deleting, setDeleting] = useState<Meeting | null>(null);
+  const [deleteError, setDeleteError] = useState("");
+  const [confirmingSave, setConfirmingSave] = useState(false);
+  const [saveConfirmError, setSaveConfirmError] = useState("");
+  const [mobileScreen, setMobileScreen] = useState<"list" | "editor">("list");
+  const [editorVisited, setEditorVisited] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [desktop, setDesktop] = useState(
+    () => window.matchMedia("(min-width: 801px)").matches,
+  );
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 801px)");
+    const update = () => setDesktop(query.matches);
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
   async function load() {
     const result = await Promise.all([
       db.from("books").select("*").order("created_at"),
@@ -125,8 +152,23 @@ export default function Admin() {
     setSuccess("");
     setForm(initial.meetings);
   }
+  function showMobileScreen(screen: "list" | "editor") {
+    setMobileScreen(screen);
+    setEditorOpen(screen === "editor");
+    if (window.matchMedia("(max-width: 800px)").matches) window.scrollTo(0, 0);
+  }
+  function openNewMeeting() {
+    if (!editorVisited || id) newMeeting();
+    setEditorVisited(true);
+    showMobileScreen("editor");
+  }
   function change(key: string, value: string | boolean) {
+    setEditorVisited(true);
     setForm((f) => ({ ...f, [key]: value }));
+  }
+  function changeFile(value: File | null) {
+    if (value) setEditorVisited(true);
+    setFile(value);
   }
   async function login(e: FormEvent) {
     e.preventDefault();
@@ -136,10 +178,20 @@ export default function Admin() {
     if (error) setError(message(error));
     setBusy(false);
   }
-  async function save(e: FormEvent) {
+  function requestSave(e: FormEvent) {
     e.preventDefault();
+    if (id) {
+      setSaveConfirmError("");
+      setConfirmingSave(true);
+    } else {
+      void save();
+    }
+  }
+  async function save() {
+    const editing = !!id;
     setBusy(true);
     setError("");
+    setSaveConfirmError("");
     setSuccess("");
     let newPath = "";
     let saved = false;
@@ -189,12 +241,20 @@ export default function Admin() {
       );
       setId("");
       setForm(initial.meetings);
+      setEditorVisited(false);
+      if (editing) {
+        setConfirmingSave(false);
+        showMobileScreen("list");
+      } else if (desktop) {
+        setEditorOpen(false);
+      }
     } catch (e) {
       if (newPath && !saved)
         try {
           await removeFiles([newPath]);
         } catch {}
-      setError(message(e));
+      if (editing) setSaveConfirmError(message(e));
+      else setError(message(e));
     } finally {
       setBusy(false);
     }
@@ -202,16 +262,9 @@ export default function Admin() {
   async function remove(row: Row) {
     const lastMeeting =
       meetings.filter((m) => m.book_id === row.book_id).length === 1;
-    if (
-      !confirm(
-        lastMeeting
-          ? "Удалить встречу и связанную с ней книгу? Это действие нельзя отменить."
-          : "Удалить встречу? Это действие нельзя отменить.",
-      )
-    )
-      return;
     setBusy(true);
     setError("");
+    setDeleteError("");
     try {
       const paths: string[] = [];
       const cover = books.find((book) => book.id === row.book_id)?.cover_path;
@@ -225,8 +278,9 @@ export default function Admin() {
       setId("");
       setForm(initial.meetings);
       setSuccess("Запись удалена.");
+      setDeleting(null);
     } catch (e) {
-      setError(message(e));
+      setDeleteError(message(e));
     } finally {
       setBusy(false);
     }
@@ -315,35 +369,101 @@ export default function Admin() {
   const published = meetings.filter(
     (meeting) => meeting.published && isUpcomingMeeting(meeting, now),
   );
+  const publishedMeetings = meetings.filter((meeting) => meeting.published);
+  const { nextMeetingId } = buildSchedule(
+    {
+      books: books.filter((book) => book.published),
+      meetings: publishedMeetings,
+      settings: null,
+    },
+    true,
+    now,
+  );
   function meetingList(rows: Row[]) {
     if (!rows.length) return <p>Встреч пока нет.</p>;
     return (
       <div className={styles["admin-list"]}>
-        {rows.map((row) => (
-          <div key={row.id}>
-            <button
-              className={styles["text-button"]}
-              onClick={() => {
-                setId(row.id);
-                const book = books.find((item) => item.id === row.book_id);
-                setForm({
-                  ...initial.meetings,
-                  ...(book ? toForm(book, initial.meetings) : {}),
-                  ...toForm(row, initial.meetings),
-                });
-                setFile(null);
-                setSuccess("");
-                if (window.matchMedia("(max-width: 800px)").matches)
-                  document
-                    .getElementById("meeting-form")
-                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
-              }}
+        {rows.map((row) => {
+          const book = books.find((item) => item.id === row.book_id);
+          const title = book?.title || "Книга";
+          const pastMeeting = !isUpcomingMeeting(row, now);
+          const next = row.published && row.id === nextMeetingId;
+          return (
+            <div
+              key={row.id}
+              className={[
+                scheduleStyles.row,
+                styles["meeting-card"],
+                pastMeeting ? scheduleStyles.past : "",
+                next ? scheduleStyles.next : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
             >
-              {`${books.find((book) => book.id === row.book_id)?.title || "Книга"} · ${row.starts_at ? new Date(row.starts_at).toLocaleDateString("ru-RU") : row.is_past ? "дата не указана" : "дата уточняется"}`}
-            </button>
-            <div className={styles["row-actions"]}>
+              <Media
+                path={book?.cover_path || null}
+                alt=""
+                className={`${scheduleStyles.thumb} ${styles["meeting-cover"]}`}
+              />
+              <div
+                className={`${scheduleStyles.book} ${styles["meeting-info"]}`}
+              >
+                {next && (
+                  <span className={scheduleStyles.badge}>
+                    Следующая встреча
+                  </span>
+                )}
+                <strong>{title}</strong>
+                {book?.author && <p>{book.author}</p>}
+                <div className={styles["meeting-date"]}>
+                  {row.is_past && !row.starts_at
+                    ? "Прошедшая встреча · дата не указана"
+                    : formatDate(row.starts_at)}
+                  {row.price != null && (
+                    <small>Стоимость: {formatPrice(row.price)}</small>
+                  )}
+                </div>
+              </div>
+              <div className={styles["row-actions"]}>
+                <button
+                  type="button"
+                  className={styles["icon-button"]}
+                  aria-label={`Редактировать: ${title}`}
+                  title="Редактировать"
+                  onClick={() => {
+                    if (!editorVisited || id !== row.id) {
+                      setId(row.id);
+                      setForm({
+                        ...initial.meetings,
+                        ...(book ? toForm(book, initial.meetings) : {}),
+                        ...toForm(row, initial.meetings),
+                      });
+                      setFile(null);
+                      setSuccess("");
+                    }
+                    setEditorVisited(true);
+                    showMobileScreen("editor");
+                  }}
+                >
+                  <Pencil size={20} aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className={styles["icon-button"]}
+                  aria-label={`Удалить: ${title}`}
+                  title="Удалить"
+                  disabled={busy}
+                  onClick={() => {
+                    setDeleteError("");
+                    setDeleting(row);
+                  }}
+                >
+                  <Trash2 size={20} aria-hidden="true" />
+                </button>
+              </div>
               {!row.published && (
                 <button
+                  type="button"
                   className={styles["text-button"]}
                   disabled={busy}
                   onClick={() => {
@@ -354,16 +474,9 @@ export default function Admin() {
                   Опубликовать
                 </button>
               )}
-              <button
-                className={[styles["text-button"], styles["danger"]].join(" ")}
-                disabled={busy}
-                onClick={() => void remove(row)}
-              >
-                Удалить
-              </button>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
   }
@@ -381,7 +494,7 @@ export default function Admin() {
           Выйти
         </button>
       </div>
-      {error && (
+      {error && !(desktop && editorOpen) && (
         <p
           className={[styles["notice"], styles["error"]].join(" ")}
           role="alert"
@@ -394,12 +507,21 @@ export default function Admin() {
           {success}
         </p>
       )}
-      <div className={styles["admin-grid"]}>
+      <div
+        className={`${styles["admin-grid"]} ${mobileScreen === "editor" ? styles["show-editor"] : ""}`}
+      >
         <div className={styles["meetings"]}>
-          <section className={styles["group"]} aria-labelledby="drafts-title">
-            <h3 id="drafts-title">Неопубликованные ({drafts.length})</h3>
+          <button
+            type="button"
+            className={styles["create-meeting"]}
+            onClick={openNewMeeting}
+          >
+            + Новая встреча
+          </button>
+          <details className={styles["group"]} open>
+            <summary>Неопубликованные ({drafts.length})</summary>
             {meetingList(drafts)}
-          </section>
+          </details>
           <details className={styles["group"]}>
             <summary>Опубликованные ({published.length})</summary>
             {meetingList(published)}
@@ -409,28 +531,97 @@ export default function Admin() {
             {meetingList(past)}
           </details>
         </div>
-        <div id="meeting-form" className={styles["form"]}>
+        <div className={styles["members-column"]}>
+          <MembersPanel />
+        </div>
+        {!desktop && (
+          <div id="meeting-form" className={styles["form"]}>
+            <button
+              type="button"
+              className={styles["back-to-list"]}
+              onClick={() => showMobileScreen("list")}
+            >
+              ← К списку встреч
+            </button>
+            <AdminForm
+              id={id}
+              form={form}
+              busy={busy}
+              change={change}
+              save={requestSave}
+              setFile={changeFile}
+              file={file}
+            />
+          </div>
+        )}
+      </div>
+      {desktop && editorOpen && (
+        <Modal
+          wide
+          labelledBy="meeting-editor-title"
+          busy={busy}
+          onClose={() => showMobileScreen("list")}
+        >
           <AdminForm
             id={id}
-            onNew={newMeeting}
             form={form}
             busy={busy}
             change={change}
-            save={save}
-            setFile={setFile}
+            save={requestSave}
+            setFile={changeFile}
+            file={file}
+            onClose={() => showMobileScreen("list")}
+            error={error}
           />
-        </div>
-      </div>
+        </Modal>
+      )}
       {publishing && (
-        <PublishDialog
-          title={
-            books.find((book) => book.id === publishing.book_id)?.title || ""
-          }
+        <ConfirmDialog
+          title="Опубликовать встречу?"
           busy={busy}
           error={publishError}
+          confirmLabel="Опубликовать"
+          busyLabel="Публикуем…"
           onCancel={() => setPublishing(null)}
           onConfirm={() => void publishMeeting()}
-        />
+        >
+          <p>
+            Встреча по книге «
+            {books.find((book) => book.id === publishing.book_id)?.title || ""}»
+            появится на сайте клуба.
+          </p>
+        </ConfirmDialog>
+      )}
+      {deleting && (
+        <ConfirmDialog
+          title="Удалить встречу?"
+          busy={busy}
+          error={deleteError}
+          confirmLabel="Удалить"
+          busyLabel="Удаляем…"
+          onCancel={() => setDeleting(null)}
+          onConfirm={() => void remove(deleting)}
+        >
+          <p>
+            {meetings.filter((meeting) => meeting.book_id === deleting.book_id)
+              .length === 1
+              ? "Встреча и связанная с ней книга будут удалены. Это действие нельзя отменить."
+              : "Встреча будет удалена. Это действие нельзя отменить."}
+          </p>
+        </ConfirmDialog>
+      )}
+      {confirmingSave && (
+        <ConfirmDialog
+          title="Сохранить изменения?"
+          busy={busy}
+          error={saveConfirmError}
+          confirmLabel="Сохранить"
+          busyLabel="Сохраняем…"
+          onCancel={() => setConfirmingSave(false)}
+          onConfirm={() => void save()}
+        >
+          <p>Изменения встречи и книги будут сохранены.</p>
+        </ConfirmDialog>
       )}
     </section>
   );

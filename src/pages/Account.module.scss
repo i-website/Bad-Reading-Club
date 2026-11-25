@@ -182,8 +182,7 @@
   min-height: calc(100vh - 90px);
   color: var(--club-green-text);
 }
-.editScreen .form,
-.nameDialog .form {
+.editScreen .form {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -196,24 +195,6 @@
   width: min(100%, 620px);
   margin: 0 auto 16px;
   font-size: 1.8rem;
-}
-.nameDialog {
-  position: fixed;
-  inset: 0;
-  margin: auto;
-  border: 1px solid #d9d7ce;
-  border-radius: 14px;
-  padding: 28px;
-  width: min(90vw, 480px);
-  background: #f4f0ea;
-  color: var(--club-green-text);
-}
-.nameDialog::backdrop {
-  background: rgb(0 0 0 / 48%);
-}
-.nameDialog h2 {
-  font-size: 1.8rem;
-  margin-bottom: 16px;
 }
 .actions {
   flex: none;

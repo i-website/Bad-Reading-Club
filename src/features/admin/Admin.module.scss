@@ -37,6 +37,11 @@ nav a.active {
   max-width: 500px;
   margin: auto;
 }
+.admin {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
 .admin-header {
   display: flex;
   justify-content: space-between;
@@ -46,9 +51,9 @@ nav a.active {
 }
 .admin-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-  gap: 60px;
-  padding-top: 35px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  padding-top: 20px;
 }
 .admin h2 {
   font-size: 1.8rem;
@@ -57,15 +62,44 @@ nav a.active {
   display: grid;
   gap: 17px;
 }
-.admin-list > div {
-  display: flex;
-  justify-content: space-between;
+.admin-list {
+  display: grid;
   gap: 10px;
-  padding: 15px 0;
-  border-bottom: 1px solid #deded5;
+}
+.meeting-card.meeting-card {
+  grid-template-columns: 55px minmax(0, 1fr) auto;
+  gap: 8px 12px;
+  padding: 12px 16px;
+}
+.meeting-card.meeting-card::before {
+  display: none;
+}
+.meeting-card.meeting-card .meeting-cover {
+  width: 55px;
+  height: 70px;
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+.meeting-info {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.meeting-date {
+  margin-top: 6px;
+  font-size: 0.9rem;
+}
+.meeting-date small {
+  display: block;
+  margin-top: 4px;
+}
+.meeting-card > .text-button {
+  grid-column: 2 / -1;
+  justify-self: start;
 }
 .group {
-  padding: 24px 0 0;
+  padding: 16px 0 0;
 }
 .group h3,
 .group summary {
@@ -79,8 +113,21 @@ nav a.active {
 }
 .row-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+  grid-column: 3;
+  grid-row: 1;
+  align-self: start;
+  gap: 0;
+}
+.icon-button {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
 }
 .text-button {
   padding: 0;
@@ -92,16 +139,95 @@ nav a.active {
   min-width: 0;
   overflow-wrap: anywhere;
 }
-.danger {
-  color: var(--club-green-text);
+.create-meeting {
+  width: 100%;
+}
+.back-to-list {
+  display: none;
+}
+.members {
+  padding: 0;
+  min-width: 0;
+}
+.members h2 {
+  margin-bottom: 16px;
+}
+.members-column {
+  min-width: 0;
+}
+.member-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.member-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #dadbd2;
+  border-radius: 12px;
+  overflow-wrap: anywhere;
+}
+.member-avatar {
+  width: 48px;
+  flex: none;
+}
+.member-avatar > div {
+  width: 100%;
+  margin: 0;
 }
 @media (max-width: 800px) {
+  :global(main):has(> .admin) {
+    padding-inline: 16px;
+  }
+  .admin {
+    min-width: 0;
+  }
   .admin-grid {
     grid-template-columns: 1fr;
-    gap: 30px;
+    gap: 0;
   }
   .form {
-    order: -1;
-    scroll-margin-top: 16px;
+    display: none;
+    min-width: 0;
+  }
+  .show-editor .meetings {
+    display: none;
+  }
+  .show-editor .members-column {
+    display: none;
+  }
+  .members-column {
+    margin-top: 28px;
+  }
+  .show-editor .form {
+    display: block;
+  }
+  .back-to-list {
+    display: block;
+    min-height: 44px;
+    background: transparent;
+    color: var(--club-green-text);
+  }
+  .back-to-list {
+    margin-bottom: 16px;
+  }
+  .admin button,
+  .admin summary {
+    min-height: 44px;
+  }
+  .admin-list .text-button {
+    padding: 8px 0;
+  }
+  .meeting-card.meeting-card {
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    padding: 12px;
+  }
+  .meeting-card.meeting-card .meeting-cover {
+    width: 42px;
+    height: 56px;
   }
 }

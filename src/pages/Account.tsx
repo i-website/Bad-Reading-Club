@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Media } from "../components/Media";
+import { Modal } from "../components/Modal";
 import type { Book } from "../types";
 import { useRatings } from "../features/ratings/useRatings";
 import {
@@ -86,15 +87,8 @@ function EditScreen({
   isAvatar: boolean;
 }) {
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const dialogRef = useRef<HTMLDialogElement>(null);
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (dialog) {
-      dialog.showModal();
-      return () => {
-        if (dialog.open) dialog.close();
-      };
-    }
+    if (!isAvatar) return;
     const oldScroll = window.scrollY;
     window.scrollTo(0, 0);
     titleRef.current?.focus({ preventScroll: true });
@@ -135,17 +129,9 @@ function EditScreen({
       {content}
     </section>
   ) : (
-    <dialog
-      ref={dialogRef}
-      className={styles.nameDialog}
-      aria-labelledby="profile-edit-title"
-      onCancel={(event) => {
-        event.preventDefault();
-        if (!busy) onClose();
-      }}
-    >
+    <Modal labelledBy="profile-edit-title" busy={busy} onClose={onClose}>
       {content}
-    </dialog>
+    </Modal>
   );
 }
 
