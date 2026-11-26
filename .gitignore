@@ -7,4 +7,6 @@ dist/
 
 backend/storage/*.sqlite*
 backend/config.php
+backend/vendor/
 .local/
+/backend/smtp.config.php

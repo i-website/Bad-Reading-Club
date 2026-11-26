@@ -2,13 +2,7 @@ import styles from "./Admin.module.scss";
 import scheduleStyles from "../../pages/Plans.module.scss";
 import { useEffect, useState, type FormEvent } from "react";
 import { Pencil, Trash2 } from "lucide-react";
-import {
-  db,
-  configured,
-  message,
-  upload,
-  removeFiles,
-} from "../../lib/supabase";
+import { adminData, adminLogin, adminLogout, adminSession, deleteMeeting, message, removeFiles, saveMeeting, upload } from "../../lib/contentApi";
 import { type Book, type Meeting } from "../../types";
 import { AdminForm } from "./AdminForm";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
@@ -69,7 +63,6 @@ function toForm(row: Row | Book, defaults: Form): Form {
 }
 export default function Admin() {
   const [session, setSession] = useState(false);
-  const [allowed, setAllowed] = useState(false);
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -100,49 +93,27 @@ export default function Admin() {
     return () => query.removeEventListener("change", update);
   }, []);
   async function load() {
-    const result = await Promise.all([
-      db.from("books").select("*").order("created_at"),
-      db.from("meetings").select("*").order("starts_at"),
-    ]);
-    for (const r of result) if (r.error) throw r.error;
-    setBooks(result[0].data as Book[]);
-    setMeetings(result[1].data as Meeting[]);
+    const result = await adminData();
+    setBooks(result.books);
+    setMeetings(result.meetings);
   }
   useEffect(() => {
     let alive = true;
     async function check() {
       try {
-        const {
-          data: { session: s },
-        } = await db.auth.getSession();
+        const s = await adminSession();
         if (!alive) return;
-        setSession(!!s);
-        if (s) {
-          const { data, error } = await db
-            .from("admin_users")
-            .select("user_id")
-            .eq("user_id", s.user.id)
-            .maybeSingle();
-          if (error) throw error;
-          if (alive) setAllowed(!!data);
-          if (data) await load();
-        }
+        setSession(s.authenticated);
+        if (s.authenticated) await load();
       } catch (e) {
         if (alive) setError(message(e));
       } finally {
         if (alive) setChecking(false);
       }
     }
-    if (configured) void check();
-    else setChecking(false);
-    const {
-      data: { subscription },
-    } = db.auth.onAuthStateChange(() => {
-      void check();
-    });
+    void check();
     return () => {
       alive = false;
-      subscription.unsubscribe();
     };
   }, []);
   function newMeeting() {
@@ -174,9 +145,19 @@ export default function Admin() {
     e.preventDefault();
     setBusy(true);
     setError("");
-    const { error } = await db.auth.signInWithPassword({ email, password });
-    if (error) setError(message(error));
-    setBusy(false);
+    try {
+      await adminLogin(email, password);
+      await load();
+      setSession(true);
+      setPassword("");
+    } catch (e) { setError(message(e)); }
+    finally { setBusy(false); }
+  }
+  async function logoutAdmin() {
+    setBusy(true);
+    try { await adminLogout(); setSession(false); setError(""); }
+    catch (e) { setError(message(e)); }
+    finally { setBusy(false); }
   }
   function requestSave(e: FormEvent) {
     e.preventDefault();
@@ -202,7 +183,7 @@ export default function Admin() {
           "Укажите корректную ссылку, начинающуюся с http:// или https://.",
         );
       }
-      if (file) newPath = await upload(file, "covers");
+      if (file) newPath = await upload(file);
       const book = {
         slug: form.slug || `book-${crypto.randomUUID()}`,
         title: form.title,
@@ -225,12 +206,7 @@ export default function Admin() {
         notes: form.notes,
         published: !!form.published,
       };
-      const { error } = await db.rpc("save_meeting_with_book", {
-        p_meeting_id: id || null,
-        p_book: book,
-        p_meeting: meeting,
-      });
-      if (error) throw error;
+      await saveMeeting(id || null, book, meeting);
       saved = true;
       if (newPath && form.cover_path)
         await removeFiles([String(form.cover_path)]);
@@ -269,10 +245,7 @@ export default function Admin() {
       const paths: string[] = [];
       const cover = books.find((book) => book.id === row.book_id)?.cover_path;
       if (lastMeeting && cover) paths.push(cover);
-      const { error } = lastMeeting
-        ? await db.from("books").delete().eq("id", row.book_id)
-        : await db.from("meetings").delete().eq("id", row.id);
-      if (error) throw error;
+      await deleteMeeting(row.id);
       await removeFiles(paths);
       await load();
       setId("");
@@ -295,12 +268,7 @@ export default function Admin() {
     setBusy(true);
     setPublishError("");
     try {
-      const { error } = await db.rpc("save_meeting_with_book", {
-        p_meeting_id: publishing.id,
-        p_book: { ...book, published: true },
-        p_meeting: { ...publishing, published: true },
-      });
-      if (error) throw error;
+      await saveMeeting(publishing.id, { ...book, published: true }, { ...publishing, published: true });
       if (id === publishing.id)
         setForm((current) => ({ ...current, published: true }));
       await load();
@@ -312,13 +280,6 @@ export default function Admin() {
       setBusy(false);
     }
   }
-  if (!configured)
-    return (
-      <section>
-        <h1 className={styles["page-title"]}>Админка</h1>
-        <p>Сначала настройте подключение к Supabase.</p>
-      </section>
-    );
   if (checking) return <p>Проверяем доступ…</p>;
   if (!session)
     return (
@@ -351,14 +312,6 @@ export default function Admin() {
           )}
           <button disabled={busy}>Войти</button>
         </form>
-      </section>
-    );
-  if (!allowed)
-    return (
-      <section>
-        <h1 className={styles["page-title"]}>Нет доступа</h1>
-        <p>Этот аккаунт не назначен администратором клуба.</p>
-        <button onClick={() => void db.auth.signOut()}>Выйти</button>
       </section>
     );
   const now = Date.now();
@@ -489,7 +442,7 @@ export default function Admin() {
         </div>
         <button
           className={styles["outline"]}
-          onClick={() => void db.auth.signOut()}
+          onClick={() => void logoutAdmin()}
         >
           Выйти
         </button>

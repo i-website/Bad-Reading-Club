@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
-import { configured, db, message } from "../lib/supabase";
-import type { ClubData as Data, Book, Meeting, Settings } from "../types";
+import { publicData, message } from "../lib/contentApi";
+import type { ClubData as Data } from "../types";
 import { Layout } from "../components/Layout";
 import { State } from "../components/State";
 import { Loader } from "../components/Loader";
@@ -32,30 +32,10 @@ export default function App() {
         if (active) setLoading(false);
       }, remaining);
     }
-    if (!configured) {
-      setError(
-        "Подключение к базе ещё не настроено. Укажите параметры Supabase в окружении.",
-      );
-      finishLoading();
-      return () => {
-        active = false;
-        window.clearTimeout(timer);
-      };
-    }
     async function load() {
       try {
-        const results = await Promise.all([
-          db.from("books").select("*").eq("published", true),
-          db.from("meetings").select("*").eq("published", true),
-          db.from("club_settings").select("*").maybeSingle(),
-        ]);
-        for (const r of results) if (r.error) throw r.error;
-        if (active)
-          setData({
-            books: results[0].data as Book[],
-            meetings: results[1].data as Meeting[],
-            settings: results[2].data as Settings | null,
-          });
+        const result = await publicData();
+        if (active) { setData(result); setError(""); }
       } catch (e) {
         if (active)
           setError(

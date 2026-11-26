@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS auth_rate_limits (
+    ip VARCHAR(45) CHARACTER SET ascii COLLATE ascii_bin NOT NULL PRIMARY KEY,
+    window_started_at BIGINT NOT NULL,
+    attempts INT UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

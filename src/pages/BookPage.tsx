@@ -1,8 +1,6 @@
 ﻿import styles from "./BookPage.module.scss";
 import { Link, useLocation, useParams } from "react-router-dom";
 import type { ClubData } from "../types";
-import { demoMode } from "../lib/supabase";
-import { demoBookRanking } from "../lib/demo";
 import { Media } from "../components/Media";
 import { formatVotes, isUpcomingMeeting } from "../lib/format";
 import { Star } from "lucide-react";
@@ -33,14 +31,9 @@ export function BookPage({ data }: { data: ClubData }) {
         </Link>
       </section>
     );
-  const baseline = demoMode
-    ? demoBookRanking.find((item) => item.bookId === book.id)
-    : undefined;
-  const rating = ratings.data
-    ? combineRatings(data.books, ratings.data.ratings).find(
-        (item) => item.book.id === book.id,
-      )
-    : baseline;
+  const rating = combineRatings(data.books, ratings.data?.ratings ?? []).find(
+    (item) => item.book.id === book.id,
+  );
   const meetings = data.meetings.filter(
     (meeting) => meeting.book_id === book.id && isUpcomingMeeting(meeting),
   );

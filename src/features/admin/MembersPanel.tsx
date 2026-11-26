@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { db, demoMode } from "../../lib/supabase";
 import { memberFetch } from "../../lib/memberApi";
 import {
   AvatarPreview,
@@ -18,13 +17,8 @@ export function MembersPanel() {
     const controller = new AbortController();
     async function loadMembers() {
       try {
-        const token = demoMode
-          ? ""
-          : (await db.auth.getSession()).data.session?.access_token;
-        if (!demoMode && !token) throw new Error("Войдите в админку ещё раз.");
         const response = await memberFetch("/api/auth.php?action=members", {
           signal: controller.signal,
-          ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}),
         });
         const result = await response.json();
         if (!response.ok)

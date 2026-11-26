@@ -1,6 +1,4 @@
 ﻿import type { Book } from "../../types";
-import { demoBookRanking } from "../../lib/demo";
-import { demoMode } from "../../lib/supabase";
 import type { RatingsData } from "./useRatings";
 
 export type RankedBook = {
@@ -27,18 +25,11 @@ export function sortRanking(
 }
 
 export function getRanking(books: Book[]): RankedBook[] {
-  if (!demoMode) return [];
-  return demoBookRanking.flatMap((item, index) => {
-    const book = books.find((entry) => entry.id === item.bookId);
-    return book
-      ? [
-          {
-            book,
-            rating: item.rating,
-            votes: item.votes,
-            rank: item.rating == null ? null : index + 1,
-          },
-        ]
+  return books.flatMap((book) => {
+    const votes = Number(book.initial_votes ?? 0);
+    const rating = Number(book.initial_rating ?? 0);
+    return Number.isFinite(votes) && votes > 0 && Number.isFinite(rating) && rating >= 1 && rating <= 10
+      ? [{ book, rating, votes, rank: null }]
       : [];
   });
 }

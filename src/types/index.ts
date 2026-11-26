@@ -6,6 +6,8 @@ export interface Book {
   description: string;
   cover_path: string | null;
   published: boolean;
+  initial_rating?: number | string;
+  initial_votes?: number | string;
 }
 export interface Meeting {
   id: string;

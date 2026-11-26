@@ -3,33 +3,71 @@
   gap: 17px;
   margin: 24px 0;
 }
+
 .loginForm {
   max-width: 600px;
 }
-.authLink {
+
+.authTitle {
+  margin-bottom: 20px;
+}
+
+.codeFields {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+  cursor: text;
+}
+
+.codeCell {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  height: 70px;
+  border: 1px solid #c5d1c8;
+  border-radius: 7px;
+  background: #fffdf9;
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.codeFields:focus-within .codeCell {
+  border-color: var(--club-green-dark);
+}
+
+.codeInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: text;
+}
+
+.codeHint {
+  display: block;
+  margin-top: 8px;
+  color: #687b70;
+  font-size: var(--font-size-caption);
+  font-weight: normal;
+  letter-spacing: normal;
+}
+
+.authBack {
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
   color: var(--club-green-dark);
   text-decoration: underline;
 }
-.passwordField {
-  position: relative;
-  display: block;
+
+.loginForm button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
-.passwordField input {
-  padding-right: 48px;
-}
-.passwordToggle {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 100%;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--club-green-text);
-}
+
 .profile {
   display: flex;
   flex-direction: column;
@@ -37,14 +75,17 @@
   text-align: center;
   padding: 30px 0 40px;
 }
+
 .avatar {
   position: relative;
   width: 154px;
   margin-bottom: 18px;
 }
+
 .avatar > div {
   margin-bottom: 0;
 }
+
 .avatarButton {
   position: absolute;
   right: 5px;
@@ -59,22 +100,26 @@
   background: var(--club-green-dark);
   color: #fff;
 }
+
 .breadcrumb {
   margin: 0;
   color: var(--club-green-dark);
   font-size: var(--font-size-caption);
 }
+
 .name {
   font-size: var(--font-size-dialog-title);
   line-height: var(--line-height-heading);
   margin-bottom: 8px;
   overflow-wrap: anywhere;
 }
+
 .member {
   color: #687b70;
   font-size: var(--font-size-caption);
   margin-bottom: 16px;
 }
+
 .editName,
 .logout {
   display: inline-flex;
@@ -84,23 +129,28 @@
   background: transparent;
   color: var(--club-green-text);
 }
+
 .editName {
   padding: 12px 16px;
 }
+
 .editName svg,
 .logout svg {
   color: var(--club-green-dark);
 }
+
 .secondary {
   background: transparent;
   color: var(--club-green-text);
 }
+
 .reviews {
   padding: 28px 0;
   border-top: 1px solid #deded5;
   border-bottom: 1px solid #deded5;
   margin-bottom: 28px;
 }
+
 .reviews h2 {
   display: flex;
   align-items: center;
@@ -108,15 +158,18 @@
   font-size: var(--font-size-card-title);
   margin-bottom: 12px;
 }
+
 .reviews h2 svg {
   flex: none;
   color: var(--club-green-dark);
 }
+
 .reviews p {
   color: #687b70;
   margin: 0 0 0 31px;
   font-size: var(--font-size-caption);
 }
+
 .ratingList {
   display: grid;
   gap: 10px;
@@ -124,6 +177,7 @@
   margin: 18px 0 0;
   padding: 0;
 }
+
 .ratingCard {
   display: flex;
   align-items: flex-start;
@@ -133,9 +187,11 @@
   border-radius: 10px;
   background: #fff9f4;
 }
+
 .ratingCard:hover {
   background: #e9eee5;
 }
+
 .ratingCover {
   flex: none;
   width: 52px;
@@ -144,6 +200,7 @@
   border-radius: 4px;
   font-size: 0.5rem;
 }
+
 .ratingDetails {
   display: grid;
   gap: 5px;
@@ -151,10 +208,12 @@
   min-width: 0;
   overflow-wrap: anywhere;
 }
+
 .ratingAuthor {
   color: #687b70;
   font-size: var(--font-size-caption);
 }
+
 .ratingScore {
   display: inline-flex;
   align-items: center;
@@ -162,19 +221,31 @@
   color: var(--club-green-dark);
   white-space: nowrap;
 }
+
 .ratingScore span {
   color: #687b70;
   font-size: var(--font-size-caption);
 }
+
 .reviews .reviewText {
   margin: 5px 0 0;
   color: var(--club-green-text);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
 .error {
   color: #b42318;
 }
+
+.fieldError {
+  display: block;
+  margin-top: 8px;
+  color: #b42318;
+  font-size: 0.85rem;
+  font-weight: normal;
+}
+
 .editScreen {
   display: flex;
   flex-direction: column;
@@ -183,6 +254,7 @@
   min-height: calc(100vh - 90px);
   color: var(--club-green-text);
 }
+
 .editScreen .form {
   display: flex;
   flex: 1;
@@ -191,12 +263,14 @@
   width: min(100%, 620px);
   margin: 0 auto;
 }
+
 .editScreen h2 {
   flex: none;
   width: min(100%, 620px);
   margin: 0 auto 16px;
   font-size: var(--font-size-dialog-title);
 }
+
 .actions {
   flex: none;
   display: flex;

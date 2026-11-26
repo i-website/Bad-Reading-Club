@@ -1,0 +1,312 @@
+[
+  {
+    "id": "club-past-1",
+    "slug": "club-book-1",
+    "title": "Вино из одуванчиков",
+    "author": "Рэй Брэдбери",
+    "description": "Лето в маленьком американском городке глазами двенадцатилетнего Дугласа Сполдинга: дружба, открытия и первые встречи с тем, что не вечно.",
+    "cover_path": "book-covers/club-past-1.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-2",
+    "slug": "club-book-2",
+    "title": "Желтая стрела",
+    "author": "Виктор Пелевин",
+    "description": "Пассажиры поезда, который никогда не останавливается, пытаются понять, есть ли жизнь за его пределами и можно ли изменить привычный ход вещей.",
+    "cover_path": "book-covers/club-past-2.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-3",
+    "slug": "club-book-3",
+    "title": "Вечера на хуторе близ Диканьки",
+    "author": "Н. В. Гоголь",
+    "description": "Сборник историй, рассказанных пасечником Рудым Паньком: украинский быт, народные поверья, любовь и проделки нечистой силы.",
+    "cover_path": "book-covers/club-past-3.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-4",
+    "slug": "club-book-4",
+    "title": "Маленькие женщины",
+    "author": "Луиза Мэй Олкот",
+    "description": "Четыре сестры Марч растут, спорят, мечтают и ищут собственный путь, сохраняя близость семьи в непростое время.",
+    "cover_path": "book-covers/club-past-4.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-5",
+    "slug": "club-book-5",
+    "title": "Если все кошки в мире исчезнут",
+    "author": "Гэнки Кавамура",
+    "description": "Молодой почтальон узнаёт о смертельной болезни и получает необычное предложение: продлить жизнь, стирая из мира привычные вещи.",
+    "cover_path": "book-covers/club-past-5.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-6",
+    "slug": "club-book-6",
+    "title": "Блеск и нищета куртизанок",
+    "author": "О. Бальзак",
+    "description": "История любви куртизанки Эстер и молодого поэта Люсьена на фоне парижского высшего света, денег и интриг.",
+    "cover_path": "book-covers/club-past-6.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-7",
+    "slug": "club-book-7",
+    "title": "Снега Килиманджаро",
+    "author": "Э. Хэмингуэй",
+    "description": "Тяжело больной писатель вспоминает прожитую жизнь во время сафари в Африке и размышляет о таланте, упущенных возможностях и смерти.",
+    "cover_path": "book-covers/club-past-7.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-8",
+    "slug": "club-book-8",
+    "title": "Игрок",
+    "author": "Ф. М. Достоевский",
+    "description": "Домашний учитель Алексей Иванович оказывается во власти рулетки и болезненной любви в курортном городе Рулетенбурге.",
+    "cover_path": "book-covers/club-past-8.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-9",
+    "slug": "club-book-9",
+    "title": "Бойня №5",
+    "author": "Курт Воннегут",
+    "description": "Билли Пилигрим переживает войну, бомбардировку Дрездена и странные путешествия во времени в романе, где трагедия соседствует с гротеском.",
+    "cover_path": "book-covers/club-past-9.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-10",
+    "slug": "club-book-10",
+    "title": "Бойцовский клуб",
+    "author": "Чак Паланик",
+    "description": "Уставший от потребительской жизни рассказчик знакомится с Тайлером Дёрденом, и их подпольный бойцовский клуб постепенно выходит из-под контроля.",
+    "cover_path": "book-covers/club-past-10.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-11",
+    "slug": "club-book-11",
+    "title": "Степной волк",
+    "author": "Герман Гессе",
+    "description": "Одинокий Гарри Галлер пытается примирить свои противоречия и заново открыть для себя радость жизни в необычном путешествии по собственному сознанию.",
+    "cover_path": "book-covers/club-past-11.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-12",
+    "slug": "club-book-12",
+    "title": "Старик и море",
+    "author": "Э. Хэмингуэй",
+    "description": "Старый кубинский рыбак Сантьяго выходит в море и вступает в долгую борьбу с огромной рыбой и собственными пределами.",
+    "cover_path": "book-covers/club-past-12.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-13",
+    "slug": "club-book-13",
+    "title": "Мартин Иден",
+    "author": "Джек Лондон",
+    "description": "Моряк Мартин Иден влюбляется, начинает заниматься самообразованием и мечтает стать писателем, сталкиваясь с законами литературного мира и общества.",
+    "cover_path": "book-covers/club-past-13.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-14",
+    "slug": "club-book-14",
+    "title": "Невыносимая легкость бытия",
+    "author": "Милан Кундера",
+    "description": "Истории Томаша, Терезы, Сабины и Франца переплетаются на фоне событий в Чехословакии. Роман о любви, свободе и весе человеческого выбора.",
+    "cover_path": "book-covers/club-past-14.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-15",
+    "slug": "club-book-15",
+    "title": "Норвежский лес",
+    "author": "Харуки Мураками",
+    "description": "Студент Тору Ватанабэ вспоминает юность в Токио, дружбу и любовь, пытаясь справиться с утратой и одиночеством.",
+    "cover_path": "book-covers/club-past-15.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-16",
+    "slug": "club-book-16",
+    "title": "Герой нашего времени",
+    "author": "М. Ю. Лермонтов",
+    "description": "Пять повестей складываются в противоречивый портрет Печорина — человека, который ищет смысл и оставляет сложный след в чужих судьбах.",
+    "cover_path": "book-covers/club-past-16.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-17",
+    "slug": "club-book-17",
+    "title": "Униженные и оскорбленные",
+    "author": "Ф. М. Достоевский",
+    "description": "Молодой писатель оказывается свидетелем семейной драмы, в которой любовь, гордость и расчёт сталкиваются с жестокостью и бедностью.",
+    "cover_path": "book-covers/club-past-17.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-18",
+    "slug": "club-book-18",
+    "title": "Проект Аве Мария",
+    "author": "Энди Вейер",
+    "description": "Учитель Райлэнд Грейс просыпается на космическом корабле без воспоминаний и постепенно понимает, что от его миссии зависит будущее Земли.",
+    "cover_path": "book-covers/club-past-18.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-19",
+    "slug": "club-book-19",
+    "title": "Скорбь Сатаны",
+    "author": "Мария Коррели",
+    "description": "Бедный писатель неожиданно получает состояние и знакомится с загадочным аристократом, который предлагает ему богатство, славу и опасные испытания.",
+    "cover_path": "book-covers/club-past-19.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-20",
+    "slug": "club-book-20",
+    "title": "Триумфальная арка",
+    "author": "Эрих Мария Ремарк",
+    "description": "В эмигрантском Париже хирург Равик встречает актрису Жоан. Их отношения разворачиваются в тревожные годы перед Второй мировой войной.",
+    "cover_path": "book-covers/club-past-20.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-21",
+    "slug": "club-book-21",
+    "title": "Скотный двор",
+    "author": "Джордж Оруэлл",
+    "description": "Животные изгоняют хозяина с фермы, мечтая о равенстве, но новое общество постепенно воспроизводит старые порядки и порождает новую власть.",
+    "cover_path": "book-covers/club-past-21.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-22",
+    "slug": "club-book-22",
+    "title": "Сиддхартха",
+    "author": "Герман Гессе",
+    "description": "Сиддхартха покидает дом в поисках истины. Через учёбу, любовь, богатство и потери он приходит к собственному пониманию жизни.",
+    "cover_path": "book-covers/club-past-22.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-23",
+    "slug": "club-book-23",
+    "title": "Пикник на обочине",
+    "author": "А/Б Стругацкие",
+    "description": "Сталкер Рэдрик Шухарт снова и снова отправляется в Зону — место, оставшееся после загадочного Посещения и полное опасных находок.",
+    "cover_path": "book-covers/club-past-23.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-24",
+    "slug": "club-book-24",
+    "title": "Поющие в терновнике",
+    "author": "Колин Маккалоу",
+    "description": "Семейная сага о Мэгги Клири, её близких и любви к священнику Ральфу на фоне суровых просторов Австралии.",
+    "cover_path": "book-covers/club-past-24.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-25",
+    "slug": "club-book-25",
+    "title": "1984",
+    "author": "Джордж Оруэлл",
+    "description": "Уинстон Смит живёт в государстве тотального контроля, где партия переписывает прошлое и следит даже за мыслями граждан.",
+    "cover_path": "book-covers/club-past-25.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-26",
+    "slug": "club-book-26",
+    "title": "Гроздья гнева",
+    "author": "Д. Стейнбек",
+    "description": "Семья Джоудов покидает разорённую ферму и отправляется в Калифорнию в поисках работы и достойной жизни во времена Великой депрессии.",
+    "cover_path": "book-covers/club-past-26.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "club-past-27",
+    "slug": "club-book-27",
+    "title": "12 стульев",
+    "author": "И. Ильф, Е. Петров",
+    "description": "Остап Бендер и Киса Воробьянинов разыскивают бриллианты, спрятанные в одном из двенадцати стульев, путешествуя по советским городам.",
+    "cover_path": "book-covers/club-past-27.jpg",
+    "starts_at": null,
+    "is_past": true
+  },
+  {
+    "id": "winter-white-fang",
+    "slug": "white-fang",
+    "title": "Белый Клык",
+    "author": "Джек Лондон",
+    "description": "История волчонка, выросшего среди суровой северной природы и людей. Пройдя через жестокость и борьбу за выживание, Белый Клык узнаёт доверие и привязанность.",
+    "cover_path": "book-covers/winter-white-fang.jpg",
+    "starts_at": "2026-12-13",
+    "is_past": false
+  },
+  {
+    "id": "demo-book-1",
+    "slug": "east-of-eden",
+    "title": "К востоку от Эдема",
+    "author": "Джон Стейнбек",
+    "description": "Семейная история Трасков и Гамильтонов в долине Салинас: роман о соперничестве, любви, добре и зле и свободе выбирать собственный путь.",
+    "cover_path": "book-covers/demo-book-1.jpg",
+    "starts_at": "2027-01-10",
+    "is_past": false
+  },
+  {
+    "id": "winter-smoke",
+    "slug": "smoke-turgenev",
+    "title": "Дым",
+    "author": "Иван Тургенев",
+    "description": "Григорий Литвинов приезжает в Баден-Баден и встречает женщину из прошлого. История любви развивается на фоне споров русского общества о будущем страны.",
+    "cover_path": "book-covers/winter-smoke.jpg",
+    "starts_at": "2027-01-31",
+    "is_past": false
+  },
+  {
+    "id": "winter-one-hundred-years",
+    "slug": "one-hundred-years-of-solitude",
+    "title": "Сто лет одиночества",
+    "author": "Габриэль Гарсиа Маркес",
+    "description": "История нескольких поколений семьи Буэндиа в Макондо, где повседневная жизнь переплетается с чудесами, памятью и повторяющимися судьбами.",
+    "cover_path": "book-covers/winter-one-hundred-years.jpg",
+    "starts_at": "2027-02-21",
+    "is_past": false
+  }
+]

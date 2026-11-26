@@ -17,6 +17,7 @@ function memoryStorage() {
 globalThis.localStorage = memoryStorage();
 globalThis.sessionStorage = memoryStorage();
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
+process.env.VITE_MEMBER_BACKEND = "browser";
 let server;
 let demo;
 let isPlaceUrl;
