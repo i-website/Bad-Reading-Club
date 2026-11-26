@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import type { ClubData as Data } from "../types";
 import { Media } from "../components/Media";
 import { isUpcomingMeeting } from "../lib/format";
+import { MeetingCard } from "../features/meetings/MeetingCard";
 import { HomeWidgets } from "../features/home-widgets/HomeWidgets";
 import { MeetingDetails } from "../features/meetings/MeetingDetails";
 export function Home({ data }: { data: Data }) {
@@ -34,10 +35,14 @@ export function Home({ data }: { data: Data }) {
           </div>
         </div>
         <div>
-          <h2 className={styles["mobile-heading"]}>
-            {upcoming?.starts_at ? "Следующая встреча" : "Встреча клуба"}
-          </h2>
-          <div className={styles["feature"]}>
+          {book && upcoming && (
+            <div className={styles.mobileEvent}>
+              <MeetingCard book={book} meeting={upcoming} />
+            </div>
+          )}
+          <div
+            className={`${styles.feature} ${book && upcoming ? styles.desktopFeature : ""}`}
+          >
             {book ? (
               <>
                 <Media

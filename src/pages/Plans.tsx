@@ -13,8 +13,7 @@ export function Plans({ data }: { data: Data }) {
   return (
     <section>
       <p className={styles["eyebrow"]}>Встречи и книги</p>
-      <h1 className={styles["page-title"]}>Расписание клуба</h1>
-      <p className={styles["subtitle"]}>Что и когда мы читаем</p>
+      <h1 className={styles["page-title"]}>Встречи клуба</h1>
       <button
         type="button"
         className={styles.toggle}
@@ -46,11 +45,7 @@ export function Plans({ data }: { data: Data }) {
                   <p>{b.author}</p>
                 </div>
                 <div className={styles["row-meta"]}>
-                  <span>
-                    {m?.is_past && !m.starts_at
-                      ? "Прошедшая встреча · дата не указана"
-                      : date(m?.starts_at || null)}
-                  </span>
+                  {!past && <span>{date(m?.starts_at || null)}</span>}
                   {m?.price != null && (
                     <small>Стоимость: {formatPrice(m.price)}</small>
                   )}

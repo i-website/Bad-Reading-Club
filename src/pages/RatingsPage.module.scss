@@ -1,8 +1,8 @@
 ﻿.eyebrow {
   text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: var(--font-size-caption);
-  color: var(--club-green-text);
+  letter-spacing: normal;
+  font-size: 0.75rem;
+  color: #687b70;
   margin-bottom: 18px;
 }
 .heading {
@@ -29,8 +29,8 @@
 }
 .options {
   display: inline-flex;
-  padding: 4px;
-  gap: 4px;
+  padding: 3px;
+  gap: 2px;
   border: 1px solid #e8ddd6;
   border-radius: 12px;
   background: #fff9f4;
@@ -48,10 +48,10 @@
 }
 .options span {
   display: block;
-  padding: 10px 14px;
+  padding: 6px 9px;
   border-radius: 8px;
   color: var(--club-green-text);
-  font-size: var(--font-size-caption);
+  font-size: 0.75rem;
   white-space: nowrap;
 }
 .options input:checked + span {

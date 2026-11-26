@@ -1,16 +1,18 @@
 ﻿import { Link } from "react-router-dom";
-import { CalendarDays } from "lucide-react";
+import { ArrowRight, CalendarDays } from "lucide-react";
 import type { Book, Meeting } from "../../types";
 import { formatDate, isUpcomingMeeting } from "../../lib/format";
 import { Media } from "../../components/Media";
-import { getRanking } from "../ratings/ranking";
+import { combineRatings } from "../ratings/ranking";
 import { RatingList } from "../ratings/RatingList";
+import { useRatings } from "../ratings/useRatings";
 import styles from "./HomeWidgets.module.scss";
 
 type Props = { books: Book[]; meetings: Meeting[] };
 
 export function HomeWidgets({ books, meetings }: Props) {
-  const ranking = getRanking(books);
+  const ratings = useRatings();
+  const ranking = combineRatings(books, ratings.data?.ratings ?? []);
   const now = Date.now();
   const upcoming = meetings
     .filter((meeting) => isUpcomingMeeting(meeting, now))
@@ -28,11 +30,23 @@ export function HomeWidgets({ books, meetings }: Props) {
             <p className={styles.eyebrow}>Книжный клуб</p>
             <h2>Рейтинг книг</h2>
           </div>
-          <Link className={styles.all} to="/ratings">
-            Весь рейтинг
+          <Link
+            className={styles.all}
+            to="/ratings"
+            aria-label="Весь рейтинг книг"
+          >
+            <ArrowRight size={20} aria-hidden="true" />
           </Link>
         </div>
-        <RatingList entries={ranking.slice(0, 3)} />
+        {ratings.loading && !ranking.length ? (
+          <p className={styles.empty}>Загружаем рейтинг…</p>
+        ) : ratings.error && !ranking.length ? (
+          <p className={styles.empty} role="status">
+            {ratings.error}
+          </p>
+        ) : (
+          <RatingList entries={ranking.slice(0, 3)} />
+        )}
       </article>
       <article className={styles.widget}>
         <div className={styles.heading}>
@@ -40,8 +54,8 @@ export function HomeWidgets({ books, meetings }: Props) {
             <p className={styles.eyebrow}>Что читаем дальше</p>
             <h2>План встреч</h2>
           </div>
-          <Link className={styles.all} to="/plans">
-            Все встречи
+          <Link className={styles.all} to="/plans" aria-label="Все встречи">
+            <ArrowRight size={20} aria-hidden="true" />
           </Link>
         </div>
         {upcoming.length ? (

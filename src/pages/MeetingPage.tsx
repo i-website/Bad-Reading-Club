@@ -1,9 +1,9 @@
-import styles from "./MeetingPage.module.scss";
+﻿import styles from "./MeetingPage.module.scss";
 import { Link, useParams } from "react-router-dom";
 import type { ClubData as Data } from "../types";
-import { Media } from "../components/Media";
 import { isUpcomingMeeting } from "../lib/format";
-import { MeetingDetails } from "../features/meetings/MeetingDetails";
+import { MeetingCard } from "../features/meetings/MeetingCard";
+
 export function MeetingPage({ data }: { data: Data }) {
   const { id } = useParams();
   const meeting = data.meetings.find((item) => item.id === id);
@@ -21,39 +21,13 @@ export function MeetingPage({ data }: { data: Data }) {
         </Link>
       </section>
     );
+
   return (
     <section className={styles.page}>
-      <Link className={styles["back"]} to="/plans">
+      <Link className={styles.back} to="/plans">
         ‹ К планам
       </Link>
-      <div className={styles["book-hero"]}>
-        <Link
-          className={styles["cover-link"]}
-          to={`/books/${book.slug}`}
-          state={{ fromMeeting: meeting.id }}
-          aria-label={`О книге «${book.title}»`}
-        >
-          <Media
-            path={book.cover_path}
-            alt={`Обложка: ${book.title}`}
-            className={styles["book-cover"]}
-          />
-        </Link>
-        <div className={styles.content}>
-          <h1 className={styles["page-title"]}>{book.title}</h1>
-          <p className={styles["lead"]}>{book.author}</p>
-          <Link
-            className={styles["book-link"]}
-            to={`/books/${book.slug}`}
-            state={{ fromMeeting: meeting.id }}
-          >
-            Подробнее о книге →
-          </Link>
-          <aside>
-            <MeetingDetails meeting={meeting} showNotes />
-          </aside>
-        </div>
-      </div>
+      <MeetingCard book={book} meeting={meeting} detail />
     </section>
   );
 }

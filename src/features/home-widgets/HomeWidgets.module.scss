@@ -13,14 +13,14 @@
 }
 .widget h2 {
   font-size: var(--font-size-content-title);
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   color: var(--club-green-dark);
 }
 .eyebrow {
   text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: var(--font-size-caption);
-  color: var(--club-green-text);
+  letter-spacing: normal;
+  font-size: 0.75rem;
+  color: #687b70;
   margin-bottom: 12px;
 }
 .empty {
@@ -38,9 +38,7 @@
 }
 .all {
   color: var(--club-green-dark);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  white-space: nowrap;
+  display: inline-flex;
 }
 .list {
   display: grid;
@@ -90,7 +88,7 @@
 @media (max-width: 800px) {
   .widgets {
     grid-template-columns: 1fr;
-    padding-bottom: 55px;
+    padding-bottom: 24px;
   }
 }
 @media (max-width: 520px) {
@@ -113,16 +111,5 @@
     grid-column: 2;
     align-self: start;
     text-align: left;
-  }
-}
-@media (max-width: 400px) {
-  .heading {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    margin-bottom: 20px;
-  }
-  .heading h2 {
-    margin-bottom: 0;
   }
 }

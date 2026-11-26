@@ -1,0 +1,86 @@
+.card {
+  color: var(--club-green-text);
+  background: #f0e9df;
+  border-radius: 16px;
+  padding: 20px;
+  height: 100%;
+}
+.label {
+  margin: 0 0 12px;
+  color: #687b70;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+.book {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+.cover {
+  width: 90px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 3px;
+}
+.book > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.book h1,
+.book h3 {
+  margin: 0 0 8px;
+  color: var(--club-green-dark);
+  font-size: var(--font-size-content-title);
+}
+.notes {
+  margin: 20px 0 0;
+  white-space: pre-wrap;
+}
+.book p {
+  margin: 0 0 12px;
+  font-size: var(--font-size-caption);
+}
+.bookLink {
+  color: var(--club-green-dark);
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.details {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 28px -8px 0;
+  padding: 12px 4px 0;
+  border-top: 1px dashed #b7c6b8;
+}
+.when {
+  display: grid;
+  gap: 2px;
+  flex: none;
+  max-width: 45%;
+  padding-right: 16px;
+  border-right: 1px solid #cbd4c8;
+  color: var(--club-green-dark);
+  text-decoration: none;
+}
+.when strong {
+  font-size: 1.35rem;
+}
+.when span {
+  color: #687b70;
+  font-size: 0.75rem;
+}
+.place {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--font-size-caption);
+}
+.place > span {
+  color: #687b70;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}

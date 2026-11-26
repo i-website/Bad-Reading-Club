@@ -25,6 +25,10 @@
 .detail strong {
   font-size: var(--font-size-date);
 }
+.place {
+  font-size: var(--font-size-date);
+  font-weight: bold;
+}
 .weekday {
   display: block;
   margin-top: 4px;

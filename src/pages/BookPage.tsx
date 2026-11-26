@@ -87,7 +87,6 @@ export function BookPage({ data }: { data: ClubData }) {
         </div>
       </div>
       <div className={styles.about}>
-        <h2>О книге</h2>
         <p
           className={book.description ? styles.prose : styles.emptyDescription}
         >

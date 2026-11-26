@@ -34,9 +34,10 @@ export function MeetingDetails({
         <div className={styles.detail}>
           <MapPin size={19} aria-hidden="true" />
           <span
-            className={
-              !meeting.place && !meeting.place_url ? styles.muted : undefined
-            }
+            className={[
+              styles.place,
+              !meeting.place && !meeting.place_url ? styles.muted : "",
+            ].filter(Boolean).join(" ")}
           >
             <PlaceLink place={meeting.place} url={meeting.place_url} />
           </span>

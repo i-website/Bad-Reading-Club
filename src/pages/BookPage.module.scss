@@ -49,14 +49,11 @@
 }
 .about {
   border-top: 1px solid #deded5;
-  margin-top: 26px;
-  padding-top: 28px;
-}
-.about h2 {
-  font-size: var(--font-size-section);
-  margin-bottom: 18px;
+  margin-top: 16px;
+  padding-top: 16px;
 }
 .prose {
+  font-size: 14px;
   white-space: pre-wrap;
 }
 .emptyDescription {

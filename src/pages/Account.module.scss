@@ -8,14 +8,24 @@
   max-width: 600px;
 }
 
+.authScreen {
+  max-width: 480px;
+  margin-inline: auto;
+}
+
 .authTitle {
   margin-bottom: 20px;
+}
+
+.codeIntro {
+  font-size: 14px;
 }
 
 .codeFields {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 64px));
+  justify-content: center;
   gap: 8px;
   margin-top: 10px;
   cursor: text;
@@ -25,11 +35,11 @@
   display: grid;
   place-items: center;
   min-width: 0;
-  height: 70px;
+  aspect-ratio: 1;
   border: 1px solid #c5d1c8;
   border-radius: 7px;
   background: #fffdf9;
-  font-size: 1.5rem;
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -50,7 +60,7 @@
   display: block;
   margin-top: 8px;
   color: #687b70;
-  font-size: var(--font-size-caption);
+  font-size: 14px;
   font-weight: normal;
   letter-spacing: normal;
 }

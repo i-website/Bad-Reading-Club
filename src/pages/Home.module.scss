@@ -4,19 +4,19 @@
   background: var(--club-green-dark);
   color: #fff;
   border-radius: 7px;
-  padding: 13px 21px;
+  padding: 8px 14px;
   display: inline-block;
   text-align: center;
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-caption);
 }
 .button:hover {
   filter: brightness(0.94);
 }
 .eyebrow {
   text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: var(--font-size-caption);
-  color: var(--club-green-text);
+  letter-spacing: normal;
+  font-size: 0.75rem;
+  color: #687b70;
   margin-bottom: 18px;
 }
 .hero {
@@ -157,7 +157,7 @@
   }
   .feature .button {
     width: 100%;
-    padding: 12px 8px;
+    padding: 8px;
   }
   .tag {
     display: none;
@@ -181,4 +181,17 @@
 }
 .feature-cover {
   min-height: 0;
+}
+
+.mobileEvent {
+  display: none;
+}
+
+@media (max-width: 800px) {
+  .desktopFeature {
+    display: none;
+  }
+  .mobileEvent {
+    display: block;
+  }
 }

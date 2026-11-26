@@ -166,15 +166,14 @@ function EditScreen({
 }
 
 export function Account({ books }: { books: Book[] }) {
-  const previewCode = Boolean(1); // Временно: показать форму для настройки стилей.
   const [session, setSession] =
     useState<Session | null>(null);
 
-  const [email, setEmail] = useState("example@mail.ru"); // Временно для просмотра формы.
+  const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
 
   const [stage, setStage] =
-    useState<"email" | "code" | "name">("code"); // Временно: просмотр экрана кода.
+    useState<"email" | "code" | "name">("email");
 
   const [resendAt, setResendAt] = useState(0);
   const [clock, setClock] = useState(Date.now());
@@ -452,8 +451,8 @@ export function Account({ books }: { books: Book[] }) {
   }
 
   return (
-    <section>
-      {(previewCode || !session?.user) && (
+    <section className={!session?.user ? styles.authScreen : undefined}>
+      {!session?.user && (
         <h1 className={styles.authTitle}>
           {stage === "name"
             ? "Регистрация"
@@ -463,15 +462,15 @@ export function Account({ books }: { books: Book[] }) {
         </h1>
       )}
 
-      {!previewCode && loading && <p>Загружаем…</p>}
+      {loading && <p>Загружаем…</p>}
 
-      {error && !edit && !previewCode && (session?.user || !session) && (
+      {error && !edit && (session?.user || !session) && (
         <p className={styles.error} role="alert">
           {error}
         </p>
       )}
 
-      {!previewCode && session?.user ? (
+      {session?.user ? (
         <>
           <p className={styles.breadcrumb}>
             Личный кабинет / Мой профиль
@@ -672,9 +671,9 @@ export function Account({ books }: { books: Book[] }) {
           )}
         </>
       ) : (
-        (previewCode || session) && (
+        session && (
           <>
-            <p>
+            <p className={stage === "code" ? styles.codeIntro : undefined}>
               {stage === "email"
                 ? "Войдите или зарегистрируйтесь по электронной почте."
                 : stage === "code"

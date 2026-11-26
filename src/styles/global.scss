@@ -59,10 +59,10 @@ button {
   background: var(--club-green-dark);
   color: #fff;
   border-radius: 7px;
-  padding: 13px 21px;
+  padding: 8px 14px;
   display: inline-block;
   text-align: center;
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-caption);
 }
 button:disabled {
   opacity: 0.55;
@@ -148,7 +148,7 @@ footer {
   justify-content: space-between;
   gap: 20px;
   color: var(--club-green-text);
-  font-size: var(--font-size-caption);
+  font-size: 12px;
 }
 footer a {
   margin-left: 18px;
