@@ -30,6 +30,7 @@ import {
 type User = {
   id: number;
   name: string;
+  email: string | null;
   avatar: Avatar | null;
 };
 
@@ -502,6 +503,10 @@ export function Account({ books }: { books: Book[] }) {
               {session.user.name}
             </h1>
 
+            {session.user.email && (
+              <p className={styles.email}>{session.user.email}</p>
+            )}
+
             <p className={styles.member}>
               Участник Bad Reading Club
             </p>
@@ -654,8 +659,6 @@ export function Account({ books }: { books: Book[] }) {
               }
             >
               <label>
-                Имя
-
                 <input
                   autoFocus
                   autoComplete="name"

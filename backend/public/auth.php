@@ -84,7 +84,7 @@ try {
 
         if (isset($_SESSION['member_id'])) {
             $query = $db->prepare(
-                'SELECT id, name, avatar
+                'SELECT id, name, avatar, email
                  FROM members
                  WHERE id = ?'
             );
@@ -457,7 +457,7 @@ try {
         ]);
 
         $query = $db->prepare(
-            'SELECT id, name, avatar
+            'SELECT id, name, avatar, email
              FROM members
              WHERE id = ?'
         );
@@ -640,7 +640,7 @@ try {
     }
 
     $query = $db->prepare(
-        'SELECT id, name, avatar
+        'SELECT id, name, avatar, email
          FROM members
          WHERE email = ?'
     );

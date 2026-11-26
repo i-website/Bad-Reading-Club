@@ -15,6 +15,7 @@
   padding: 28px;
   background: #f4f0ea;
   color: var(--club-green-text);
+  font-size: 14px;
 }
 .modal::-webkit-scrollbar {
   width: 10px;
@@ -38,6 +39,12 @@
   width: min(780px, calc(100vw - 32px));
 }
 .modal h2 {
-  font-size: var(--font-size-dialog-title);
+  color: var(--club-green-dark);
+  font-size: 22px;
   margin-bottom: 16px;
+}
+.modal input,
+.modal textarea,
+.modal select {
+  font-size: 14px;
 }
