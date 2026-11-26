@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, useEffect, useState } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { publicData, message } from "../lib/contentApi";
 import type { ClubData as Data } from "../types";
@@ -11,11 +11,11 @@ import { BookPage } from "../pages/BookPage";
 import { MeetingPage } from "../pages/MeetingPage";
 import { RatingsPage } from "../pages/RatingsPage";
 import { Account } from "../pages/Account";
+import { NotFound } from "../pages/NotFound";
 const Admin = lazy(() => import("../features/admin/Admin"));
 const blank: Data = {
   books: [],
   meetings: [],
-  settings: null,
 };
 export default function App() {
   const location = useLocation();
@@ -53,15 +53,13 @@ export default function App() {
   }, [location.pathname, startedAt]);
   if (loading) return <Loader />;
   return (
-    <Layout settings={data.settings}>
+    <Layout>
       <Routes>
         <Route path="/account" element={<Account books={data.books} />} />
         <Route
           path="/admin/*"
           element={
-            <Suspense fallback={<p>Загружаем админку…</p>}>
               <Admin />
-            </Suspense>
           }
         />
         <Route
@@ -78,14 +76,14 @@ export default function App() {
                     element={<RatingsPage data={data} />}
                   />
                   <Route
-                    path="/books/:slug"
+                    path="/books/:id"
                     element={<BookPage data={data} />}
                   />
                   <Route
                     path="/meetings/:id"
                     element={<MeetingPage data={data} />}
                   />
-                  <Route path="*" element={<p>Страница не найдена.</p>} />
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
               )}
             </>

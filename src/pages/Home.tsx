@@ -26,7 +26,7 @@ export function Home({ data }: { data: Data }) {
             CLUB
           </h1>
           <p className={styles["lead"]}>
-            {data.settings?.description || "Читаем, обсуждаем, встречаемся."}
+            Читаем, обсуждаем, встречаемся.
           </p>
           <div className={styles["actions"]}>
             <Link className={styles["button"]} to="/plans">

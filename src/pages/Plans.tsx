@@ -66,7 +66,7 @@ export function Plans({ data }: { data: Data }) {
               <Link
                 className={className}
                 key={m?.id || b.id}
-                to={m ? `/meetings/${m.id}` : `/books/${b.slug}`}
+                to={m ? `/meetings/${m.id}` : `/books/${b.id}`}
               >
                 {content}
               </Link>

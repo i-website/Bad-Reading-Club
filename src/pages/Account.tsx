@@ -566,7 +566,7 @@ export function Account({ books }: { books: Book[] }) {
                             className={
                               styles.ratingCard
                             }
-                            to={`/books/${book.slug}`}
+                            to={`/books/${book.id}`}
                           >
                             <Media
                               path={book.cover_path}

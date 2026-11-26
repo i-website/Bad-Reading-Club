@@ -6,12 +6,12 @@ try {
     $c = require __DIR__ . '/config.php';
     $db = new PDO(sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4', $c['host'], $c['port'], $c['database']), $c['username'], $c['password'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_EMULATE_PREPARES => false]);
     $db->beginTransaction();
-    $insertBook = $db->prepare('INSERT IGNORE INTO books (id, slug, title, author, description, cover_path, published) VALUES (?, ?, ?, ?, ?, ?, 1)');
+    $insertBook = $db->prepare('INSERT IGNORE INTO books (id, title, author, description, cover_path, published) VALUES (?, ?, ?, ?, ?, 1)');
     $readBook = $db->prepare('SELECT title, author FROM books WHERE id = ?');
     $insertMeeting = $db->prepare('INSERT IGNORE INTO meetings (id, book_id, starts_at, place, place_url, notes, published, is_past) VALUES (?, ?, ?, ?, ?, ?, 1, ?)');
     $imported = 0; $skipped = 0;
     foreach ($items as $item) {
-        $insertBook->execute([$item['id'], $item['slug'], $item['title'], $item['author'], $item['description'], $item['cover_path']]);
+        $insertBook->execute([$item['id'], $item['title'], $item['author'], $item['description'], $item['cover_path']]);
         $readBook->execute([$item['id']]); $book = $readBook->fetch(PDO::FETCH_ASSOC);
         if (!$book || $book['title'] !== $item['title'] || $book['author'] !== $item['author']) { $skipped++; continue; }
         $past = (bool) $item['is_past'];

@@ -1,13 +1,11 @@
 <?php
 declare(strict_types=1);
-require_once dirname(__DIR__) . '/auth_rate_limit.php';
+require_once dirname(__DIR__) . '/admin_access.php';
+require_once dirname(__DIR__) . '/session.php';
 
 header('X-Content-Type-Options: nosniff');
 header('Cache-Control: no-store');
-ini_set('session.use_strict_mode', '1');
-ini_set('session.use_only_cookies', '1');
-session_set_cookie_params(['httponly' => true, 'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'samesite' => 'Lax', 'path' => '/']);
-session_start();
+startClubSession();
 
 function answer(int $status, array $data): never {
     header('Content-Type: application/json; charset=utf-8');
@@ -29,14 +27,6 @@ function boolRows(array $rows): array {
         return $row;
     }, $rows);
 }
-function isAdmin(PDO $db): bool {
-    if (!isset($_SESSION['admin_id'])) return false;
-    $query = $db->prepare('SELECT 1 FROM admin_users WHERE id = ?');
-    $query->execute([$_SESSION['admin_id']]);
-    if ($query->fetchColumn()) return true;
-    unset($_SESSION['admin_id']);
-    return false;
-}
 function coverFile(string $path): ?string {
     if (!preg_match('/^covers\/[a-f0-9]{64}\.(?:jpg|png|webp)$/D', $path)) return null;
     return dirname(__DIR__) . '/storage/' . $path;
@@ -47,18 +37,25 @@ try {
     $db = new PDO($dsn, $config['username'], $config['password'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_EMULATE_PREPARES => false]);
     $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
     $action = $_GET['action'] ?? '';
-    $admin = isAdmin($db);
+    $admin = memberIsAdmin($db);
     if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'session') answer(200, ['authenticated' => $admin, 'csrf' => $_SESSION['csrf']]);
     if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'public') {
-        $books = boolRows($db->query('SELECT id, slug, title, author, description, cover_path, published, initial_rating, initial_votes FROM books WHERE published = 1 ORDER BY created_at, id')->fetchAll(PDO::FETCH_ASSOC));
+        $books = boolRows($db->query('SELECT id, title, author, description, cover_path, published, initial_rating, initial_votes FROM books WHERE published = 1 ORDER BY created_at, id')->fetchAll(PDO::FETCH_ASSOC));
         $meetings = boolRows($db->query('SELECT m.id, m.book_id, m.starts_at, m.place, m.place_url, m.price, m.notes, m.published, m.is_past FROM meetings m JOIN books b ON b.id = m.book_id WHERE m.published = 1 AND b.published = 1 ORDER BY m.starts_at, m.id')->fetchAll(PDO::FETCH_ASSOC));
-        $settings = $db->query('SELECT name, description, links FROM club_settings WHERE id = 1')->fetch(PDO::FETCH_ASSOC);
-        if ($settings) $settings['links'] = json_decode($settings['links'], true) ?: [];
-        answer(200, ['books' => $books, 'meetings' => $meetings, 'settings' => $settings ?: null]);
+        answer(200, ['books' => $books, 'meetings' => $meetings]);
+    }
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'book-legacy-url') {
+        $slug = is_string($_GET['slug'] ?? null) ? $_GET['slug'] : '';
+        if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/D', $slug) || strlen($slug) > 160) answer(404, ['error' => 'Книга не найдена.']);
+        $query = $db->prepare('SELECT b.id FROM book_legacy_urls u JOIN books b ON b.id = u.book_id WHERE u.slug = ? AND b.published = 1');
+        $query->execute([$slug]);
+        $bookId = $query->fetchColumn();
+        if (!$bookId) answer(404, ['error' => 'Книга не найдена.']);
+        answer(200, ['id' => $bookId]);
     }
     if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'admin-data') {
         if (!$admin) answer(403, ['error' => 'Нет доступа.']);
-        $books = boolRows($db->query('SELECT id, slug, title, author, description, cover_path, published FROM books ORDER BY created_at, id')->fetchAll(PDO::FETCH_ASSOC));
+        $books = boolRows($db->query('SELECT id, title, author, description, cover_path, published FROM books ORDER BY created_at, id')->fetchAll(PDO::FETCH_ASSOC));
         $meetings = boolRows($db->query('SELECT id, book_id, starts_at, place, place_url, price, notes, published, is_past FROM meetings ORDER BY starts_at, id')->fetchAll(PDO::FETCH_ASSOC));
         answer(200, ['books' => $books, 'meetings' => $meetings]);
     }
@@ -80,29 +77,6 @@ try {
     }
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') answer(405, ['error' => 'Метод не поддерживается.']);
     if (!hash_equals($_SESSION['csrf'], $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '')) answer(403, ['error' => 'Сессия устарела. Обновите страницу.']);
-    if ($action === 'login') {
-        if (!allowAuthAttempt($db, $_SERVER['REMOTE_ADDR'] ?? 'unknown', time())) answer(429, ['error' => 'Слишком много попыток. Попробуйте через 15 минут.']);
-        $input = json_decode(file_get_contents('php://input'), true);
-        if (!is_array($input)) answer(400, ['error' => 'Некорректный запрос.']);
-        $email = strtolower(textField($input, 'email', 254, true));
-        $password = $input['password'] ?? null;
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !is_string($password) || strlen($password) > 72 || str_contains($password, "\0")) answer(400, ['error' => 'Проверьте email и пароль.']);
-        $query = $db->prepare('SELECT id, password_hash FROM admin_users WHERE email = ?');
-        $query->execute([$email]);
-        $user = $query->fetch(PDO::FETCH_ASSOC);
-        $valid = password_verify($password, $user['password_hash'] ?? '$2y$12$o7Jdf0INpQb0KPemCBj9eOfH5enJAnBRPe4H8wBQsKNHp5LwKkPFq');
-        if (!$user || !$valid) answer(401, ['error' => 'Неверный email или пароль.']);
-        session_regenerate_id(true);
-        $_SESSION['admin_id'] = (int) $user['id'];
-        $_SESSION['csrf'] = bin2hex(random_bytes(32));
-        answer(200, ['ok' => true]);
-    }
-    if ($action === 'logout') {
-        unset($_SESSION['admin_id']);
-        session_regenerate_id(true);
-        $_SESSION['csrf'] = bin2hex(random_bytes(32));
-        answer(200, ['ok' => true]);
-    }
     if (!$admin) answer(403, ['error' => 'Нет доступа.']);
     if ($action === 'upload') {
         $upload = $_FILES['cover'] ?? null;
@@ -133,8 +107,6 @@ try {
         if ($id !== null && (!is_string($id) || !preg_match('/^[a-zA-Z0-9_-]{1,128}$/D', $id))) answer(400, ['error' => 'Некорректная встреча.']);
         $book = $input['book'] ?? null; $meeting = $input['meeting'] ?? null;
         if (!is_array($book) || !is_array($meeting) || !is_bool($book['published'] ?? null) || !is_bool($meeting['published'] ?? null)) answer(400, ['error' => 'Проверьте заполненные поля.']);
-        $slug = textField($book, 'slug', 160, true);
-        if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/D', $slug)) answer(400, ['error' => 'Некорректный адрес книги.']);
         $title = textField($book, 'title', 255, true); $author = textField($book, 'author', 255, true);
         $description = textField($book, 'description', 60000);
         $cover = $book['cover_path'] ?? null;
@@ -149,15 +121,15 @@ try {
         $db->beginTransaction();
         if ($id === null) {
             $bookId = newId(); $id = newId();
-            $query = $db->prepare('INSERT INTO books (id, slug, title, author, description, cover_path, published) VALUES (?, ?, ?, ?, ?, ?, ?)');
-            $query->execute([$bookId, $slug, $title, $author, $description, $cover, $book['published'] ? 1 : 0]);
+            $query = $db->prepare('INSERT INTO books (id, title, author, description, cover_path, published) VALUES (?, ?, ?, ?, ?, ?)');
+            $query->execute([$bookId, $title, $author, $description, $cover, $book['published'] ? 1 : 0]);
             $query = $db->prepare('INSERT INTO meetings (id, book_id, starts_at, place, place_url, price, notes, published) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
             $query->execute([$id, $bookId, $date, $place ?: null, $placeUrl ?: null, $price, $notes, $meeting['published'] ? 1 : 0]);
         } else {
             $query = $db->prepare('SELECT book_id FROM meetings WHERE id = ? FOR UPDATE'); $query->execute([$id]); $bookId = $query->fetchColumn();
             if (!$bookId) { $db->rollBack(); answer(404, ['error' => 'Встреча не найдена.']); }
-            $query = $db->prepare('UPDATE books SET slug = ?, title = ?, author = ?, description = ?, cover_path = ?, published = GREATEST(published, ?) WHERE id = ?');
-            $query->execute([$slug, $title, $author, $description, $cover, $book['published'] ? 1 : 0, $bookId]);
+            $query = $db->prepare('UPDATE books SET title = ?, author = ?, description = ?, cover_path = ?, published = GREATEST(published, ?) WHERE id = ?');
+            $query->execute([$title, $author, $description, $cover, $book['published'] ? 1 : 0, $bookId]);
             $query = $db->prepare('UPDATE meetings SET starts_at = ?, place = ?, place_url = ?, price = ?, notes = ?, published = ? WHERE id = ?');
             $query->execute([$date, $place ?: null, $placeUrl ?: null, $price, $notes, $meeting['published'] ? 1 : 0, $id]);
         }

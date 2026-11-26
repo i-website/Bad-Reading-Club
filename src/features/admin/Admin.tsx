@@ -2,12 +2,13 @@ import styles from "./Admin.module.scss";
 import scheduleStyles from "../../pages/Plans.module.scss";
 import { useEffect, useState, type FormEvent } from "react";
 import { Pencil, Trash2 } from "lucide-react";
-import { adminData, adminLogin, adminLogout, adminSession, deleteMeeting, message, removeFiles, saveMeeting, upload } from "../../lib/contentApi";
+import { adminData, adminSession, deleteMeeting, message, removeFiles, saveMeeting, upload } from "../../lib/contentApi";
 import { type Book, type Meeting } from "../../types";
 import { AdminForm } from "./AdminForm";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { Modal } from "../../components/Modal";
 import { MembersPanel } from "./MembersPanel";
+import { NotFound } from "../../pages/NotFound";
 import { Media } from "../../components/Media";
 import { isPlaceUrl } from "../../lib/place";
 import {
@@ -21,7 +22,6 @@ type Row = Meeting;
 import type { Form } from "./types";
 const initial: Record<"meetings", Form> = {
   meetings: {
-    slug: "",
     title: "",
     author: "",
     description: "",
@@ -64,8 +64,6 @@ function toForm(row: Row | Book, defaults: Form): Form {
 export default function Admin() {
   const [session, setSession] = useState(false);
   const [checking, setChecking] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [books, setBooks] = useState<Book[]>([]);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [form, setForm] = useState<Form>(initial.meetings);
@@ -141,24 +139,6 @@ export default function Admin() {
     if (value) setEditorVisited(true);
     setFile(value);
   }
-  async function login(e: FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    setError("");
-    try {
-      await adminLogin(email, password);
-      await load();
-      setSession(true);
-      setPassword("");
-    } catch (e) { setError(message(e)); }
-    finally { setBusy(false); }
-  }
-  async function logoutAdmin() {
-    setBusy(true);
-    try { await adminLogout(); setSession(false); setError(""); }
-    catch (e) { setError(message(e)); }
-    finally { setBusy(false); }
-  }
   function requestSave(e: FormEvent) {
     e.preventDefault();
     if (id) {
@@ -185,7 +165,6 @@ export default function Admin() {
       }
       if (file) newPath = await upload(file);
       const book = {
-        slug: form.slug || `book-${crypto.randomUUID()}`,
         title: form.title,
         author: form.author,
         description: form.description,
@@ -281,39 +260,7 @@ export default function Admin() {
     }
   }
   if (checking) return <p>Проверяем доступ…</p>;
-  if (!session)
-    return (
-      <section className={styles["login"]}>
-        <h1 className={styles["page-title"]}>Вход для организатора</h1>
-        <p>Управление книгами и встречами клуба.</p>
-        <form onSubmit={login}>
-          <label>
-            Email
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </label>
-          <label>
-            Пароль
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </label>
-          {error && (
-            <p className={styles["error"]} role="alert">
-              {error}
-            </p>
-          )}
-          <button disabled={busy}>Войти</button>
-        </form>
-      </section>
-    );
+  if (!session) return error ? <p role="alert">{error}</p> : <NotFound />;
   const now = Date.now();
   const past = meetings.filter((meeting) => !isUpcomingMeeting(meeting, now));
   const drafts = meetings.filter(
@@ -327,7 +274,6 @@ export default function Admin() {
     {
       books: books.filter((book) => book.published),
       meetings: publishedMeetings,
-      settings: null,
     },
     true,
     now,
@@ -440,12 +386,7 @@ export default function Admin() {
           <p className={styles["eyebrow"]}>Управление клубом</p>
           <h1 className={styles["page-title"]}>Админка</h1>
         </div>
-        <button
-          className={styles["outline"]}
-          onClick={() => void logoutAdmin()}
-        >
-          Выйти
-        </button>
+
       </div>
       {error && !(desktop && editorOpen) && (
         <p

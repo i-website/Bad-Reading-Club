@@ -25,8 +25,6 @@ export async function publicData(): Promise<ClubData> {
 export async function adminData(): Promise<{ books: Book[]; meetings: Meeting[] }> {
   return read(await fetch("/api/content.php?action=admin-data", { credentials: "same-origin", cache: "no-store" }));
 }
-export const adminLogin = (email: string, password: string) => post("login", { email, password });
-export const adminLogout = () => post("logout", {});
 export const saveMeeting = (id: string | null, book: object, meeting: object) => post("save-meeting", { id, book, meeting });
 export const deleteMeeting = (id: string) => post("delete-meeting", { id });
 export async function upload(file: File): Promise<string> {

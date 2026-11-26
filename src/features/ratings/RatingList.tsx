@@ -12,7 +12,7 @@ export function RatingList({ entries }: { entries: RankedBook[] }) {
     <ol className={styles.ranking}>
       {entries.map(({ book, rating, votes, rank }) => (
         <li key={book.id}>
-          <Link className={styles.row} to={`/books/${book.slug}`}>
+          <Link className={styles.row} to={`/books/${book.id}`}>
             <span className={styles.position}>{rank ?? "—"}</span>
             <Media path={book.cover_path} alt="" className={styles.cover} />
             <span className={styles.book}>

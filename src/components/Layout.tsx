@@ -1,21 +1,29 @@
 import styles from "./Layout.module.scss";
 import { Link, NavLink } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import type { Settings } from "../types";
 import { BrandMark } from "./BrandMark";
+import { adminSession } from "../lib/contentApi";
 export function Layout({
   children,
-  settings,
 }: {
   children: React.ReactNode;
-  settings: Settings | null;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!menuOpen) return;
+    let active = true;
+    setIsAdmin(false);
+    void adminSession()
+      .then((session) => {
+        if (active) setIsAdmin(session.authenticated);
+      })
+      .catch(() => {
+        if (active) setIsAdmin(false);
+      });
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setMenuOpen(false);
@@ -28,6 +36,7 @@ export function Layout({
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("pointerdown", onPointerDown);
     return () => {
+      active = false;
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("pointerdown", onPointerDown);
     };
@@ -42,7 +51,7 @@ export function Layout({
           onClick={() => setMenuOpen(false)}
         >
           <BrandMark className={styles["mark"]} />
-          {settings?.name || "BAD READING CLUB"}
+          BAD READING CLUB
         </Link>
         <div className={styles.menu} ref={menuRef}>
           <button
@@ -101,6 +110,17 @@ export function Layout({
             >
               Рейтинг
             </NavLink>
+            {isAdmin && (
+              <NavLink
+                to="/admin"
+                onClick={() => setMenuOpen(false)}
+                className={({ isActive }) =>
+                  isActive ? styles.active : undefined
+                }
+              >
+                Админка
+              </NavLink>
+            )}
           </nav>
         </div>
       </header>
@@ -108,13 +128,6 @@ export function Layout({
       <footer>
         <span>BAD READING CLUB</span>
         <span>Читаем, обсуждаем, встречаемся.</span>
-        <div>
-          {settings?.links?.map((l) => (
-            <a key={l.url} href={l.url} target="_blank" rel="noreferrer">
-              {l.label}
-            </a>
-          ))}
-        </div>
       </footer>
     </>
   );

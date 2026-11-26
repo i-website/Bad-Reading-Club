@@ -2,7 +2,7 @@ import { pastBooks, winterMeetings } from "./mockData";
 import { bookDescriptions } from "./bookDescriptions";
 type RecordData = Record<string, unknown>;
 type Table =
-  "books" | "meetings" | "meeting_photos" | "club_settings" | "admin_users";
+  "books" | "meetings" | "meeting_photos" | "admin_users";
 type Database = Record<Table, RecordData[]> & {
   files: Record<string, string>;
   mockDatasetVersion?: number;
@@ -26,14 +26,6 @@ const seed: Database = {
   ],
   meetings: [],
   meeting_photos: [],
-  club_settings: [
-    {
-      id: 1,
-      name: "BAD READING CLUB",
-      description: "Читаем, обсуждаем, встречаемся.",
-      links: [],
-    },
-  ],
   admin_users: [{ user_id: "demo-admin" }],
   files: {},
 };
@@ -386,14 +378,11 @@ export const demoDb = {
       return { data: null, error: { message: "Встреча не найдена." } };
     if (
       !args.p_book.title ||
-      !args.p_book.author ||
-      data.books.some(
-        (item) => item.slug === args.p_book.slug && item.id !== book?.id,
-      )
+      !args.p_book.author
     ) {
       return {
         data: null,
-        error: { message: "Проверьте название, автора и адрес книги." },
+        error: { message: "Проверьте название и автора книги." },
       };
     }
     if (book && meeting) {

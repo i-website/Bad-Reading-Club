@@ -4,23 +4,14 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/rating_eligibility.php';
 require_once dirname(__DIR__) . '/auth_rate_limit.php';
+require_once dirname(__DIR__) . '/admin_access.php';
+require_once dirname(__DIR__) . '/session.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 
-ini_set('session.use_strict_mode', '1');
-ini_set('session.use_only_cookies', '1');
-
-session_set_cookie_params([
-    'httponly' => true,
-    'secure' => !empty($_SERVER['HTTPS'])
-        && $_SERVER['HTTPS'] !== 'off',
-    'samesite' => 'Lax',
-    'path' => '/'
-]);
-
-session_start();
+startClubSession();
 
 function respond(int $status, array $data): never {
     http_response_code($status);
@@ -37,20 +28,6 @@ function memberData(array $member): array {
         : null;
 
     return $member;
-}
-
-function adminAuthorized(PDO $db): bool {
-    if (!isset($_SESSION['admin_id'])) {
-        return false;
-    }
-
-    $query = $db->prepare(
-        'SELECT 1 FROM admin_users WHERE id = ?'
-    );
-
-    $query->execute([$_SESSION['admin_id']]);
-
-    return (bool) $query->fetchColumn();
 }
 
 try {
@@ -81,7 +58,7 @@ try {
         $_SERVER['REQUEST_METHOD'] === 'GET'
         && $action === 'members'
     ) {
-        if (!adminAuthorized($db)) {
+        if (!memberIsAdmin($db)) {
             respond(403, [
                 'error' => 'Нет доступа к списку участников.'
             ]);
@@ -253,6 +230,7 @@ try {
     if ($action === 'logout') {
         unset(
             $_SESSION['member_id'],
+            $_SESSION['member_expires_at'],
             $_SESSION['email_login_pending']
         );
 
@@ -699,6 +677,7 @@ try {
     session_regenerate_id(true);
 
     $_SESSION['member_id'] = (int) $member['id'];
+    $_SESSION['member_expires_at'] = time() + MEMBER_SESSION_TTL;
     $_SESSION['csrf'] = bin2hex(random_bytes(32));
 
     respond(200, [

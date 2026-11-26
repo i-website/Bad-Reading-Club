@@ -1,5 +1,5 @@
 ﻿import styles from "./BookPage.module.scss";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 import type { ClubData } from "../types";
 import { Media } from "../components/Media";
 import { formatVotes, isUpcomingMeeting } from "../lib/format";
@@ -11,7 +11,7 @@ import { useRatings } from "../features/ratings/useRatings";
 import { combineRatings } from "../features/ratings/ranking";
 
 export function BookPage({ data }: { data: ClubData }) {
-  const { slug } = useParams();
+  const { id } = useParams();
   const location = useLocation();
   const ratings = useRatings();
   const [reviewsRevision, setReviewsRevision] = useState(0);
@@ -20,8 +20,44 @@ export function BookPage({ data }: { data: ClubData }) {
   useEffect(() => {
     setEditingRating(false);
     setRatingEligible(false);
-  }, [slug]);
-  const book = data.books.find((item) => item.slug === slug);
+  }, [id]);
+  const book = data.books.find((item) => item.id === id);
+  const [legacy, setLegacy] = useState<{
+    key: string;
+    id: string | null;
+    error?: boolean;
+  } | null>(null);
+  useEffect(() => {
+    if (book || !id) return;
+    const controller = new AbortController();
+    fetch(
+      `/api/content.php?action=book-legacy-url&slug=${encodeURIComponent(id)}`,
+      { signal: controller.signal },
+    )
+      .then(async (response) => {
+        if (response.status === 404) return null;
+        if (!response.ok) throw new Error();
+        const result = (await response.json()) as { id: string };
+        return result.id;
+      })
+      .then((resolvedId) => setLegacy({ key: id, id: resolvedId }))
+      .catch(() => {
+        if (!controller.signal.aborted)
+          setLegacy({ key: id, id: null, error: true });
+      });
+    return () => controller.abort();
+  }, [book, id]);
+  if (!book && id && legacy?.key !== id) return <p>Загружаем книгу…</p>;
+  if (!book && legacy?.id)
+    return (
+      <Navigate
+        to={`/books/${encodeURIComponent(legacy.id)}`}
+        replace
+        state={location.state}
+      />
+    );
+  if (!book && legacy?.error)
+    return <p role="alert">Не удалось загрузить книгу. Попробуйте позже.</p>;
   if (!book)
     return (
       <section>

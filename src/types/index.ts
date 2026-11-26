@@ -1,6 +1,5 @@
 export interface Book {
   id: string;
-  slug: string;
   title: string;
   author: string;
   description: string;
@@ -21,14 +20,7 @@ export interface Meeting {
   /** Historical mock meetings without an exact date. */
   is_past?: boolean;
 }
-export interface Settings {
-  id: number;
-  name: string;
-  description: string;
-  links: { label: string; url: string }[];
-}
 export type ClubData = {
   books: Book[];
   meetings: Meeting[];
-  settings: Settings | null;
 };

@@ -58,7 +58,7 @@ export function MeetingCard({
           <p>{book.author}</p>
           <Link
             className={styles.bookLink}
-            to={`/books/${book.slug}`}
+            to={`/books/${book.id}`}
             state={meeting ? { fromMeeting: meeting.id } : undefined}
           >
             О книге →
