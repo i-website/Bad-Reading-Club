@@ -9,11 +9,13 @@
   align-content: start;
 }
 .editor h3 {
+  color: var(--club-green-dark);
   font-size: var(--font-size-section);
   line-height: var(--line-height-heading);
   margin: 0;
 }
 .editor h2 {
+  color: var(--club-green-dark);
   margin-bottom: 0;
 }
 .editorHeader {
@@ -112,9 +114,10 @@
   width: min(100%, 180px);
   min-height: 100px;
   overflow: hidden;
-  border: 1px dashed #bfc8bd;
+  border: 1px dashed var(--club-green-dark);
   border-radius: 6px;
   text-align: center;
+  color: var(--club-green-dark);
   cursor: pointer;
 }
 .coverLabel {

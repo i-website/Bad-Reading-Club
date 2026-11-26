@@ -1,7 +1,7 @@
 import styles from "./Admin.module.scss";
 import scheduleStyles from "../../pages/Plans.module.scss";
 import { useEffect, useState, type FormEvent } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Archive, CalendarCheck, ChevronDown, FilePenLine, Pencil, Trash2 } from "lucide-react";
 import { adminData, adminSession, deleteMeeting, message, removeFiles, saveMeeting, upload } from "../../lib/contentApi";
 import { type Book, type Meeting } from "../../types";
 import { AdminForm } from "./AdminForm";
@@ -344,7 +344,7 @@ export default function Admin() {
                     showMobileScreen("editor");
                   }}
                 >
-                  <Pencil size={20} aria-hidden="true" />
+                  <Pencil size={16} aria-hidden="true" />
                 </button>
                 <button
                   type="button"
@@ -357,7 +357,7 @@ export default function Admin() {
                     setDeleting(row);
                   }}
                 >
-                  <Trash2 size={20} aria-hidden="true" />
+                  <Trash2 size={16} aria-hidden="true" />
                 </button>
               </div>
               {!row.published && (
@@ -412,18 +412,20 @@ export default function Admin() {
           >
             + Новая встреча
           </button>
-          <details className={styles["group"]} open>
-            <summary>Неопубликованные ({drafts.length})</summary>
+          {(drafts.length > 0 || published.length > 0 || past.length > 0) && <div className={styles.groups}>
+          {drafts.length > 0 && <details className={`${styles.group} ${styles.meetingGroup}`}>
+            <summary><FilePenLine size={16} aria-hidden="true" /><span>Неопубликованные</span><span className={styles.groupCount}>{drafts.length}</span><ChevronDown className={styles.groupChevron} size={16} aria-hidden="true" /></summary>
             {meetingList(drafts)}
-          </details>
-          <details className={styles["group"]}>
-            <summary>Опубликованные ({published.length})</summary>
+          </details>}
+          {published.length > 0 && <details className={`${styles.group} ${styles.meetingGroup}`}>
+            <summary><CalendarCheck size={16} aria-hidden="true" /><span>Опубликованные</span><span className={styles.groupCount}>{published.length}</span><ChevronDown className={styles.groupChevron} size={16} aria-hidden="true" /></summary>
             {meetingList(published)}
-          </details>
-          <details className={styles["group"]}>
-            <summary>Прошедшие ({past.length})</summary>
+          </details>}
+          {past.length > 0 && <details className={`${styles.group} ${styles.meetingGroup}`}>
+            <summary><Archive size={16} aria-hidden="true" /><span>Прошедшие</span><span className={styles.groupCount}>{past.length}</span><ChevronDown className={styles.groupChevron} size={16} aria-hidden="true" /></summary>
             {meetingList(past)}
-          </details>
+          </details>}
+          </div>}
         </div>
         <div className={styles["members-column"]}>
           <MembersPanel />

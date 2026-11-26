@@ -67,7 +67,7 @@ try {
         $members = array_map(
             'memberData',
             $db->query(
-                'SELECT id, name, avatar
+                'SELECT id, name, avatar, email
                  FROM members
                  ORDER BY name, id'
             )->fetchAll(PDO::FETCH_ASSOC)

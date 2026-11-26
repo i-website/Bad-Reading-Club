@@ -24,21 +24,23 @@ export function ConfirmDialog({
   const titleId = useId();
   return (
     <Modal labelledBy={titleId} busy={busy} onClose={onCancel}>
-      <h2 id={titleId}>{title}</h2>
-      {children}
-      {error && <p role="alert">{error}</p>}
-      <div className={styles.actions}>
-        <button
-          type="button"
-          className={styles.cancel}
-          onClick={onCancel}
-          disabled={busy}
-        >
-          Отмена
-        </button>
-        <button type="button" onClick={onConfirm} disabled={busy}>
-          {busy ? busyLabel : confirmLabel}
-        </button>
+      <div className={styles.dialog}>
+        <h2 id={titleId}>{title}</h2>
+        {children}
+        {error && <p role="alert">{error}</p>}
+        <div className={styles.actions}>
+          <button
+            type="button"
+            className={styles.cancel}
+            onClick={onCancel}
+            disabled={busy}
+          >
+            Отмена
+          </button>
+          <button type="button" onClick={onConfirm} disabled={busy}>
+            {busy ? busyLabel : confirmLabel}
+          </button>
+        </div>
       </div>
     </Modal>
   );

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ChevronDown, Users } from "lucide-react";
 import { memberFetch } from "../../lib/memberApi";
 import {
   AvatarPreview,
@@ -7,7 +8,12 @@ import {
 } from "../avatar/AvatarEditor";
 import styles from "./Admin.module.scss";
 
-type Member = { id: number | string; name: string; avatar: Avatar | null };
+type Member = {
+  id: number | string;
+  name: string;
+  avatar: Avatar | null;
+  email: string | null;
+};
 
 export function MembersPanel() {
   const [members, setMembers] = useState<Member[]>([]);
@@ -36,29 +42,42 @@ export function MembersPanel() {
     void loadMembers();
     return () => controller.abort();
   }, []);
+  if (loading) return <p>Загружаем участников…</p>;
+  if (error) return <p role="alert">{error}</p>;
+  if (!members.length) return null;
   return (
-    <section className={styles.members} aria-labelledby="members-title">
-      <h2 id="members-title">
-        Участники{!loading && !error ? ` (${members.length})` : ""}
-      </h2>
-      {loading && <p>Загружаем участников…</p>}
-      {error && <p role="alert">{error}</p>}
-      {!loading &&
-        !error &&
-        (members.length ? (
-          <ul className={styles["member-list"]}>
-            {members.map((member) => (
-              <li key={member.id} className={styles["member-card"]}>
-                <div className={styles["member-avatar"]} aria-hidden="true">
-                  <AvatarPreview value={normalizeAvatar(member.avatar)} />
-                </div>
-                <span>{member.name}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>Участников пока нет.</p>
-        ))}
+    <section className={styles.members}>
+      <div className={`${styles.groups} ${styles.membersGroups}`}>
+        <details className={styles.group}>
+          <summary>
+            <Users size={16} aria-hidden="true" />
+            <span>Участники</span>
+            <span className={styles.groupCount}>
+              {members.length}
+            </span>
+            <ChevronDown
+              className={styles.groupChevron}
+              size={16}
+              aria-hidden="true"
+            />
+          </summary>
+              <ul className={styles["member-list"]}>
+                {members.map((member) => (
+                  <li key={member.id} className={styles["member-card"]}>
+                    <div className={styles["member-avatar"]} aria-hidden="true">
+                      <AvatarPreview value={normalizeAvatar(member.avatar)} />
+                    </div>
+                    <div className={styles.memberDetails}>
+                      <span>{member.name}</span>
+                      <span className={styles.memberEmail}>
+                        {member.email || "Email не указан"}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+        </details>
+      </div>
     </section>
   );
 }
